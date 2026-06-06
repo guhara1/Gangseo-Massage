@@ -25,6 +25,7 @@ BRAND_SHORT= "굿데이"
 PHONE_DISP = "0508-202-4743"                     # 예약 전화번호
 PHONE_TEL  = "+825082024743"                     # tel: 링크용
 HOURS      = "연중무휴 · 24시간 상담"
+INDEXNOW_KEY = "da13fc2a62ee6d42f722420f9353f628"   # IndexNow(빙·네이버 등) 인증 키
 
 COMPANY = {
     "name": "굿데이 헬스케어",
@@ -2150,6 +2151,10 @@ def build_meta_files():
                'font-size="34" font-weight="700" text-anchor="middle" fill="#1a1208">G</text></svg>')
     with open(os.path.join(ROOT, "favicon.svg"), "w", encoding="utf-8") as f:
         f.write(favicon)
+
+    # IndexNow 인증 키 파일 — https://<도메인>/<KEY>.txt 로 노출되어야 함
+    with open(os.path.join(ROOT, f"{INDEXNOW_KEY}.txt"), "w", encoding="utf-8") as f:
+        f.write(INDEXNOW_KEY)
 
 
 # ---------------------------------------------------------------------------
