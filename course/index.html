@@ -245,6 +245,51 @@ details>div{padding:0 22px 20px;color:var(--muted);font-size:14.5px;line-height:
 .data-box{margin:24px 0;padding:20px 22px;border-radius:14px;background:var(--grad-soft);border:1px solid var(--line)}
 .data-box b{color:var(--gold);display:block;font-size:11px;letter-spacing:.14em;margin-bottom:8px;text-transform:uppercase}
 .data-box p{color:var(--muted);font-size:13.5px;margin:0;line-height:1.8}
+/* 다크 럭스 스파 — 지역/콘텐츠 페이지 (네이비 패널 + 골드 + 좌측 TOC) */
+.lux-hero{position:relative;overflow:hidden;border-bottom:1px solid rgba(244,210,156,.14);
+  background:radial-gradient(70% 120% at 88% -10%,rgba(233,184,167,.14),transparent 60%),
+             linear-gradient(180deg,#0d1018,#0b0b0e);padding:54px 0 40px}
+.lux-h1{font-size:clamp(30px,5vw,52px);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin:14px 0 12px;color:#fff}
+.lux-lead{color:#cfd2da;font-size:16.5px;line-height:1.8;max-width:760px}
+.lux-body{background:linear-gradient(180deg,#0b0b0e,#0c0e15 40%,#0b0b0e)}
+.lux-grid{display:grid;grid-template-columns:240px 1fr;gap:46px;align-items:start}
+.toc{position:sticky;top:86px}
+.toc-inner{border:1px solid rgba(244,210,156,.2);border-radius:16px;padding:18px 14px;
+  background:linear-gradient(165deg,#10131f,#0a0c13);box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.toc-label{display:block;font-size:10.5px;letter-spacing:.2em;color:var(--gold);font-weight:800;text-transform:uppercase;margin:0 0 12px 8px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li a{display:block;padding:8px 12px;font-size:13px;line-height:1.4;color:var(--muted);
+  border-left:2px solid transparent;border-radius:0 8px 8px 0;transition:.2s}
+.toc li a:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.toc li a.active{color:var(--gold);border-left-color:var(--gold);background:rgba(244,210,156,.09);font-weight:700}
+.lux-main{min-width:0}
+.lux-sec{position:relative;overflow:hidden;background:linear-gradient(165deg,#121626,#0c0e16);
+  border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:28px 32px;margin-bottom:18px}
+.lux-sec::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad)}
+.lux-sec h2{font-size:clamp(20px,2.5vw,27px);font-weight:800;letter-spacing:-.02em;margin:0 0 14px;color:#fff}
+.lux-sec h3{color:var(--gold);font-size:16.5px;font-weight:800;margin:20px 0 7px}
+.lux-sec p{color:#e4e5ec;font-size:15.5px;line-height:1.9;margin:0 0 12px}
+.lux-sec>ul{margin:6px 0 14px;padding:0;list-style:none}
+.lux-sec>ul li{position:relative;padding:8px 0 8px 22px;color:#e4e5ec;font-size:15px;line-height:1.65;
+  border-bottom:1px solid rgba(255,255,255,.06)}
+.lux-sec>ul li::before{content:"";position:absolute;left:3px;top:15px;width:6px;height:6px;border-radius:50%;background:var(--grad)}
+.lux-sec>ul li:last-child{border-bottom:none}
+.lux-sec a{color:var(--rose);font-weight:600;border-bottom:1px solid rgba(233,184,167,.4)}
+.lux-sec a:hover{color:var(--gold);border-bottom-color:var(--gold)}
+.lux-sec strong{color:#fff}
+.lux-sec .grid{margin-top:6px}
+.lux-main .data-box{margin:4px 0 0;background:linear-gradient(135deg,rgba(244,210,156,.12),rgba(201,138,107,.05));
+  border:1px solid rgba(244,210,156,.22)}
+@media(max-width:980px){
+  .lux-grid{grid-template-columns:1fr;gap:14px}
+  .toc{position:static}
+  .toc-inner{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px 14px}
+  .toc-label{margin:0 4px 0 2px}
+  .toc ul{display:flex;flex-wrap:wrap;gap:6px}
+  .toc li a{border-left:none;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12px}
+  .toc li a.active{background:var(--grad);color:#1a1208;border-color:transparent}
+  .lux-sec{padding:22px 20px}
+}
 /* 플로팅 전화예약 버튼 (전 페이지) */
 .call-fab{position:fixed;right:20px;bottom:20px;z-index:90;display:inline-flex;align-items:center;gap:9px;
   padding:14px 20px 14px 16px;border-radius:999px;color:#fff;font-weight:800;font-size:14.5px;letter-spacing:-.01em;
@@ -355,6 +400,15 @@ details>div{padding:0 22px 20px;color:var(--muted);font-size:14.5px;line-height:
     var io=new IntersectionObserver(function(es){es.forEach(function(e){
       if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12,rootMargin:'80px'});
     document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+    var secs=[].slice.call(document.querySelectorAll('.lux-sec')),
+        links=[].slice.call(document.querySelectorAll('.toc a'));
+    if(secs.length&&links.length){
+      var spy=new IntersectionObserver(function(es){es.forEach(function(e){
+        if(e.isIntersecting){var id=e.target.id;
+          links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+id);});}});
+      },{rootMargin:'-35% 0px -55% 0px'});
+      secs.forEach(function(s){spy.observe(s);});
+    }
   });
 })();
 </script>

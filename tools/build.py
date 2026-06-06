@@ -360,6 +360,51 @@ details>div{padding:0 22px 20px;color:var(--muted);font-size:14.5px;line-height:
 .data-box{margin:24px 0;padding:20px 22px;border-radius:14px;background:var(--grad-soft);border:1px solid var(--line)}
 .data-box b{color:var(--gold);display:block;font-size:11px;letter-spacing:.14em;margin-bottom:8px;text-transform:uppercase}
 .data-box p{color:var(--muted);font-size:13.5px;margin:0;line-height:1.8}
+/* 다크 럭스 스파 — 지역/콘텐츠 페이지 (네이비 패널 + 골드 + 좌측 TOC) */
+.lux-hero{position:relative;overflow:hidden;border-bottom:1px solid rgba(244,210,156,.14);
+  background:radial-gradient(70% 120% at 88% -10%,rgba(233,184,167,.14),transparent 60%),
+             linear-gradient(180deg,#0d1018,#0b0b0e);padding:54px 0 40px}
+.lux-h1{font-size:clamp(30px,5vw,52px);font-weight:800;letter-spacing:-.03em;line-height:1.1;margin:14px 0 12px;color:#fff}
+.lux-lead{color:#cfd2da;font-size:16.5px;line-height:1.8;max-width:760px}
+.lux-body{background:linear-gradient(180deg,#0b0b0e,#0c0e15 40%,#0b0b0e)}
+.lux-grid{display:grid;grid-template-columns:240px 1fr;gap:46px;align-items:start}
+.toc{position:sticky;top:86px}
+.toc-inner{border:1px solid rgba(244,210,156,.2);border-radius:16px;padding:18px 14px;
+  background:linear-gradient(165deg,#10131f,#0a0c13);box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.toc-label{display:block;font-size:10.5px;letter-spacing:.2em;color:var(--gold);font-weight:800;text-transform:uppercase;margin:0 0 12px 8px}
+.toc ul{list-style:none;margin:0;padding:0}
+.toc li a{display:block;padding:8px 12px;font-size:13px;line-height:1.4;color:var(--muted);
+  border-left:2px solid transparent;border-radius:0 8px 8px 0;transition:.2s}
+.toc li a:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.toc li a.active{color:var(--gold);border-left-color:var(--gold);background:rgba(244,210,156,.09);font-weight:700}
+.lux-main{min-width:0}
+.lux-sec{position:relative;overflow:hidden;background:linear-gradient(165deg,#121626,#0c0e16);
+  border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:28px 32px;margin-bottom:18px}
+.lux-sec::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad)}
+.lux-sec h2{font-size:clamp(20px,2.5vw,27px);font-weight:800;letter-spacing:-.02em;margin:0 0 14px;color:#fff}
+.lux-sec h3{color:var(--gold);font-size:16.5px;font-weight:800;margin:20px 0 7px}
+.lux-sec p{color:#e4e5ec;font-size:15.5px;line-height:1.9;margin:0 0 12px}
+.lux-sec>ul{margin:6px 0 14px;padding:0;list-style:none}
+.lux-sec>ul li{position:relative;padding:8px 0 8px 22px;color:#e4e5ec;font-size:15px;line-height:1.65;
+  border-bottom:1px solid rgba(255,255,255,.06)}
+.lux-sec>ul li::before{content:"";position:absolute;left:3px;top:15px;width:6px;height:6px;border-radius:50%;background:var(--grad)}
+.lux-sec>ul li:last-child{border-bottom:none}
+.lux-sec a{color:var(--rose);font-weight:600;border-bottom:1px solid rgba(233,184,167,.4)}
+.lux-sec a:hover{color:var(--gold);border-bottom-color:var(--gold)}
+.lux-sec strong{color:#fff}
+.lux-sec .grid{margin-top:6px}
+.lux-main .data-box{margin:4px 0 0;background:linear-gradient(135deg,rgba(244,210,156,.12),rgba(201,138,107,.05));
+  border:1px solid rgba(244,210,156,.22)}
+@media(max-width:980px){
+  .lux-grid{grid-template-columns:1fr;gap:14px}
+  .toc{position:static}
+  .toc-inner{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px 14px}
+  .toc-label{margin:0 4px 0 2px}
+  .toc ul{display:flex;flex-wrap:wrap;gap:6px}
+  .toc li a{border-left:none;border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:12px}
+  .toc li a.active{background:var(--grad);color:#1a1208;border-color:transparent}
+  .lux-sec{padding:22px 20px}
+}
 /* 플로팅 전화예약 버튼 (전 페이지) */
 .call-fab{position:fixed;right:20px;bottom:20px;z-index:90;display:inline-flex;align-items:center;gap:9px;
   padding:14px 20px 14px 16px;border-radius:999px;color:#fff;font-weight:800;font-size:14.5px;letter-spacing:-.01em;
@@ -543,6 +588,15 @@ JS = """
     var io=new IntersectionObserver(function(es){es.forEach(function(e){
       if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12,rootMargin:'80px'});
     document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+    var secs=[].slice.call(document.querySelectorAll('.lux-sec')),
+        links=[].slice.call(document.querySelectorAll('.toc a'));
+    if(secs.length&&links.length){
+      var spy=new IntersectionObserver(function(es){es.forEach(function(e){
+        if(e.isIntersecting){var id=e.target.id;
+          links.forEach(function(a){a.classList.toggle('active',a.getAttribute('href')==='#'+id);});}});
+      },{rootMargin:'-35% 0px -55% 0px'});
+      secs.forEach(function(s){spy.observe(s);});
+    }
   });
 })();
 """
@@ -774,39 +828,51 @@ def article_ld(title, desc, path):
         "datePublished": UPDATED, "dateModified": UPDATED,
     }
 
+def render_lux(sections):
+    """다크 럭스 섹션 패널 + 좌측 고정 목차(TOC) 생성.
+    sections: [(title, [블록...])]  블록: 문자열(문단)/("ul",[…])/("h3","…")/("html","원본")."""
+    toc, panels = [], []
+    for i, (title, blocks) in enumerate(sections, 1):
+        sid = f"sec-{i}"
+        toc.append(f'<li><a href="#{sid}">{title}</a></li>')
+        inner = ""
+        for b in blocks:
+            if isinstance(b, tuple) and b[0] == "ul":
+                inner += "<ul>" + "".join(f"<li>{x}</li>" for x in b[1]) + "</ul>"
+            elif isinstance(b, tuple) and b[0] == "h3":
+                inner += f"<h3>{b[1]}</h3>"
+            elif isinstance(b, tuple) and b[0] == "html":
+                inner += b[1]
+            else:
+                inner += f"<p>{b}</p>"
+        panels.append(f'<section class="lux-sec reveal" id="{sid}"><h2>{title}</h2>{inner}</section>')
+    toc_html = ('<aside class="toc"><div class="toc-inner"><span class="toc-label">목차</span>'
+                f'<ul>{"".join(toc)}</ul></div></aside>')
+    return toc_html, "".join(panels)
+
 def content_page(path, active, trail, *, title, desc, eyebrow, h1, lead,
                  sections, faq, data_note=None, service=None, show_price=False,
                  top_links=None, extra_schema=None, cta_title=None):
-    """E-E-A-T 기준 개별 콘텐츠 페이지 생성기.
-    sections: [(h2, [블록...])]  블록은 문자열(문단) 또는 ("ul",[항목]) / ("h3","제목").
-    top_links: 상단 CTA 버튼 [(href, label, primary?)]   extra_schema: 추가 JSON-LD 리스트."""
-    art = ""
-    for h2, blocks in sections:
-        art += f"<h2>{h2}</h2>"
-        for b in blocks:
-            if isinstance(b, tuple) and b[0] == "ul":
-                art += "<ul>" + "".join(f"<li>{x}</li>" for x in b[1]) + "</ul>"
-            elif isinstance(b, tuple) and b[0] == "h3":
-                art += f"<h3>{b[1]}</h3>"
-            else:
-                art += f"<p>{b}</p>"
+    """E-E-A-T 기준 개별 콘텐츠 페이지 생성기 (다크 럭스 레이아웃 + TOC)."""
+    toc_html, panels = render_lux(sections)
     if data_note:
-        art += f'<div class="data-box"><b>현장 운영 메모</b><p>{data_note}</p></div>'
+        panels += f'<div class="data-box"><b>현장 운영 메모</b><p>{data_note}</p></div>'
     links_html = ""
     if top_links:
         btns = ""
         for href, label, *rest in top_links:
             primary = rest and rest[0]
             cls = "btn btn-primary" if primary else "btn btn-ghost"
-            tag_attr = "" if href.startswith("tel:") else ""
-            btns += f'<a class="{cls}" href="{href}"{tag_attr}>{label}</a>'
-        links_html = f'<div class="actions" style="margin-top:20px">{btns}</div>'
+            btns += f'<a class="{cls}" href="{href}">{label}</a>'
+        links_html = f'<div class="actions" style="margin-top:22px">{btns}</div>'
     body = (breadcrumb(trail) +
-        f'<section class="block" style="padding-bottom:32px"><div class="wrap">'
+        f'<section class="lux-hero"><div class="wrap">'
         f'<span class="eyebrow"><span class="pulse"></span>{eyebrow}</span>'
-        f'<h1 style="font-size:clamp(29px,5vw,50px);font-weight:800;letter-spacing:-.03em;margin:14px 0 10px">{h1}</h1>'
-        f'<p class="sec-lead">{lead}</p>{byline()}{links_html}</div></section>'
-        f'<section class="block" style="padding-top:8px"><div class="wrap"><div class="article">{art}</div></div></section>'
+        f'<h1 class="lux-h1">{h1}</h1>'
+        f'<p class="lux-lead">{lead}</p>{byline()}{links_html}</div></section>'
+        f'<section class="block lux-body" style="padding-top:34px"><div class="wrap">'
+        f'<div class="lux-grid">{toc_html}<div class="lux-main">{panels}</div></div>'
+        f'</div></section>'
         + (price_menu_block() if show_price else "")
         + faq_block(faq) + (cta_band(cta_title) if cta_title else cta_band()))
     jsonld = [bc_ld(trail), article_ld(title, desc, path), faq_ld(faq)]
@@ -1180,18 +1246,8 @@ def build_area_pages():
             f'<span class="more">자세히 →</span></a>' for d in r["dongs"])
         dong_lines = [f'<a href="/gangseo-gu/{d["slug"]}/">{d["name"]}</a>은 {d["character"]}로, {d["landmarks"]} 인근을 평균 {d["arrival"]}분 내외로 방문합니다.'
                       for d in r["dongs"]]
-        notes = [
-            ("권역의 특징", [r["summary"],
-              f'{r["name"]}은 ' + ", ".join(d["name"] for d in r["dongs"]) + " 일대를 포함합니다."]),
-            ("동별 방문 안내", dong_lines),
-            ("예약·코스·위생은 전용 안내에서",
-             ["권역 내 예약 가능 시간·준비물·위생 기준·코스 요금은 페이지마다 반복하지 않고 전용 안내에서 확인하실 수 있습니다.",
-              "예약 가능 시간은 <a href=\"/gangseo-gu/hours/\">예약 가능 시간</a>, 준비물은 <a href=\"/gangseo-gu/checklist/\">이용 전 확인사항</a>, 위생 기준은 <a href=\"/gangseo-gu/safety/\">위생 및 안전 안내</a>, 코스·요금은 <a href=\"/course/\">코스안내</a>에서 확인하세요."]),
-        ]
         # 동별 sub-notes (발산역/방화1~3동 등)
         sub_notes = [d.get("sub_note") for d in r["dongs"] if d.get("sub_note")]
-        if sub_notes:
-            notes.append(("세부 지역 안내", sub_notes))
         chips = "".join(
             f'<span class="chip"><b>{d["name"]}</b> 평균 {d["arrival"]}분</span>' for d in r["dongs"])
         area_faq = [
@@ -1200,28 +1256,34 @@ def build_area_pages():
             (f"{r['name']} 예약은 어떻게 하나요?",
              "전화 또는 문의로 동·시간·코스를 말씀해 주시면 방문 가능 시간을 확정해 드립니다."),
         ]
-        body = (breadcrumb(trail) +
-            f'<section class="block"><div class="wrap">'
-            f'<span class="eyebrow"><span class="pulse"></span>AREA · {r["name"]}</span>'
-            f'<h2 class="sec">{r["name"]} 출장마사지</h2>'
-            f'<p class="sec-lead">{r["summary"]}</p>'
-            f'<div class="chips">{chips}</div>'
-            f'<div class="grid g3" style="margin-top:26px">{dong_cards}</div>'
-            f'</div></section>' +
-            notes_block("FIELD NOTES · 2026", f"{r['name']} 운영 안내",
-                        "권역의 특징과 동별 방문 안내입니다.", notes, _id="about") +
-            faq_block(area_faq) + cta_band(f"{r['name']} 방문 예약을 도와드릴까요?"))
-        jsonld = [bc_ld(trail),
-                  localbiz_ld(name=f"굿데이 {r['name']} 출장마사지", area=f"서울특별시 강서구 {r['name']}",
-                              path=f"/gangseo-gu/{r['slug']}/"),
-                  service_ld(f"{r['name']} 출장마사지", r["summary"], f"/gangseo-gu/{r['slug']}/"),
-                  faq_ld(area_faq)]
-        html = page(f"/gangseo-gu/{r['slug']}/",
-            f"{r['name']} 출장마사지 | 강서구 {r['name']} 방문 마사지",
-            f"{r['name']} 출장마사지 안내 - " + ", ".join(d['name'] for d in r['dongs']) +
-            f" 일대 방문 건강관리 예약 안내입니다. {r['summary']}",
-            "area", body, jsonld)
-        write(f"/gangseo-gu/{r['slug']}/", html)
+        sections = [
+            (f"{r['name']} 방문 가능 동", [
+                f"{r['name']}은 " + "·".join(d["name"] for d in r["dongs"]) + " 일대를 포함합니다. 원하는 동을 눌러 상세 안내를 확인하세요.",
+                ("html", f'<div class="chips" style="margin-bottom:18px">{chips}</div>'
+                         f'<div class="grid g3">{dong_cards}</div>')]),
+            ("권역의 특징", [r["summary"]]),
+            ("동별 방문 안내", dong_lines),
+        ]
+        if sub_notes:
+            sections.append(("세부 지역 안내", sub_notes))
+        sections.append(("예약·코스·위생은 전용 안내에서", [
+            "권역 내 예약 가능 시간·준비물·위생 기준·코스 요금은 페이지마다 반복하지 않고 전용 안내에서 확인하실 수 있습니다.",
+            ("ul", ['<a href="/gangseo-gu/hours/">예약 가능 시간 안내</a>',
+                    '<a href="/gangseo-gu/checklist/">이용 전 확인사항(준비물)</a>',
+                    '<a href="/gangseo-gu/safety/">위생 및 안전 안내</a>',
+                    '<a href="/course/">코스안내 · 가격</a>'])]))
+        top_links = [("tel:" + PHONE_TEL, "예약문의", True), ("/course/", "코스안내"),
+                     ("/gangseo-gu/", "강서 출장마사지 대표"), ("/gangseo-gu/area/", "지역별 안내")]
+        content_page(f"/gangseo-gu/{r['slug']}/", "area", trail,
+            title=f"{r['name']} 출장마사지 | 강서구 {r['name']} 방문 마사지",
+            desc=f"{r['name']} 출장마사지 안내 - " + ", ".join(d['name'] for d in r['dongs']) +
+                 f" 일대 방문 건강관리 예약 안내입니다. {r['summary']}",
+            eyebrow=f"강서구 · {r['name']}", h1=f"{r['name']} 출장마사지", lead=r["summary"],
+            sections=sections, faq=area_faq, top_links=top_links,
+            cta_title=f"{r['name']} 방문 예약을 도와드릴까요?",
+            service=(f"{r['name']} 출장마사지", r["summary"]),
+            extra_schema=[localbiz_ld(name=f"굿데이 {r['name']} 출장마사지",
+                                      area=f"서울특별시 강서구 {r['name']}", path=f"/gangseo-gu/{r['slug']}/")])
 
 
 # ---- 동 pages -------------------------------------------------------------
