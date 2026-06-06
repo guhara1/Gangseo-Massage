@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-굿데이 강서출장마사지 — static site generator.
+굿데이 강서 출장마사지 — static site generator.
 
 One-time generator that emits PURE static HTML (inline CSS/JS, zero runtime
 dependencies). The published site needs no build step or framework; this script
@@ -20,7 +20,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Brand / business constants  (replace placeholders before going live)
 # ---------------------------------------------------------------------------
 BASE_URL   = "https://www.gangseo-massage.com"   # TODO: 실제 도메인으로 교체
-BRAND      = "굿데이 강서출장마사지"
+BRAND      = "굿데이 강서 출장마사지"
 BRAND_SHORT= "굿데이"
 PHONE_DISP = "0507-1234-5678"                    # TODO: 실제 번호로 교체
 PHONE_TEL  = "+8250712345678"                    # tel: 링크용
@@ -129,10 +129,10 @@ COURSES = [
     {"slug": "sports", "kicker": "SPORTS · 스포츠", "name": "스포츠 관리",
      "desc": "운동 후 뭉친 근육과 컨디션 회복에 초점을 맞춘 관리입니다.",
      "prices": [("60분", "90,000원"), ("90분", "120,000원"), ("120분", "150,000원")]},
-    {"slug": "couple", "kicker": "COUPLE · 커플/가족", "name": "커플/가족 관리",
+    {"slug": "couple", "kicker": "COUPLE · 커플·가족", "name": "커플·가족 방문 관리",
      "desc": "두 분이 함께 같은 공간에서 동시에 받는 동반 관리입니다.",
      "prices": [("60분", "150,000원~"), ("90분", "200,000원~"), ("120분", "250,000원~")]},
-    {"slug": "group", "kicker": "GROUP · 기업/단체", "name": "기업/단체 관리",
+    {"slug": "group", "kicker": "GROUP · 기업·단체", "name": "기업·단체 방문 관리",
      "desc": "워크숍·행사 등 단체 인원을 위한 사전 협의형 방문 관리입니다.",
      "prices": [("협의", "별도 견적"), ("협의", "별도 견적"), ("협의", "별도 견적")]},
 ]
@@ -387,7 +387,9 @@ def menu_html(active):
             sub_html = f'<ul class="submenu">{items}</ul>'
         return f"<li>{a}{sub_html}</li>"
 
-    region_sub = [(f"/gangseo-gu/{r['slug']}/", r["name"]) for r in REGIONS]
+    region_sub = [("/gangseo-gu/", "강서 출장마사지"),
+                  ("/gangseo-gu/area/", "강서구 출장 가능 지역")]
+    region_sub += [(f"/gangseo-gu/{r['slug']}/", r["name"]) for r in REGIONS]
     items = [
         li("home", "/", "홈"),
         li("about", "/about/", "굿데이 소개", [
@@ -396,12 +398,14 @@ def menu_html(active):
             ("/about/#safety", "위생 및 안전 관리"),
             ("/about/#faq", "자주 묻는 질문"),
         ]),
-        li("gangseo", "/gangseo-gu/", "강서출장마사지", [
-            ("/gangseo-gu/#intro", "강서구 출장마사지 안내"),
-            ("/gangseo-gu/#area", "출장 가능 지역"),
+        li("gangseo", "/gangseo-gu/", "강서 출장마사지", [
+            ("/gangseo-gu/#intro", "강서 출장마사지 안내"),
+            ("/gangseo-gu/#area", "강서구 출장 가능 지역"),
             ("/gangseo-gu/#hours", "예약 가능 시간"),
-            ("/gangseo-gu/#check", "관리 전 확인사항"),
+            ("/gangseo-gu/#course", "코스 선택 안내"),
+            ("/gangseo-gu/#check", "이용 전 확인사항"),
             ("/gangseo-gu/#safety", "위생 및 안전 안내"),
+            ("/gangseo-gu/#faq", "강서 출장마사지 FAQ"),
         ]),
         li("area", "/gangseo-gu/area/", "지역별 안내", region_sub),
         li("course", "/course/", "코스안내", [
@@ -409,8 +413,8 @@ def menu_html(active):
             ("/course/#fatigue", "피로 회복 관리"),
             ("/course/#aroma", "아로마 관리"),
             ("/course/#sports", "스포츠 관리"),
-            ("/course/#couple", "커플/가족 관리"),
-            ("/course/#group", "기업/단체 관리"),
+            ("/course/#couple", "커플·가족 방문 관리"),
+            ("/course/#group", "기업·단체 방문 관리"),
             ("/course/#price", "가격 안내"),
             ("/course/#guide", "코스 선택 가이드"),
         ]),
@@ -422,8 +426,8 @@ def menu_html(active):
     ]
     return (
         '<header><nav class="nav" aria-label="주 메뉴">'
-        '<a class="brand" href="/" aria-label="굿데이 강서출장마사지 홈">'
-        '<span class="mark">G</span><span>굿데이<small>강서출장마사지</small></span></a>'
+        '<a class="brand" href="/" aria-label="굿데이 강서 출장마사지 홈">'
+        '<span class="mark">G</span><span>굿데이<small>강서 출장마사지</small></span></a>'
         '<button class="toggle" aria-expanded="false" aria-controls="primary-menu" aria-label="메뉴 열기">☰</button>'
         f'<ul id="primary-menu" class="menu">{"".join(items)}</ul>'
         "</nav></header>"
@@ -787,7 +791,7 @@ def build_home():
 
     about_notes = [
         ("WHO · 누가 운영하나요",
-         ["굿데이 강서출장마사지는 서울 강서구 전역을 담당하는 방문 건강관리 예약 운영팀입니다.",
+         ["굿데이 강서 출장마사지는 서울 강서구 전역을 담당하는 방문 건강관리 예약 운영팀입니다.",
           "본사 디스패처가 예약 접수부터 관리사 배차까지 직접 관리합니다."]),
         ("HOW · 어떻게 진행되나요",
          ["전화 상담으로 지역·시간·코스를 확인한 뒤 방문 가능 시간을 확정합니다.",
@@ -862,7 +866,7 @@ def build_home():
 """
     jsonld = [org_ld(), website_ld(), localbiz_ld(), offer_ld(), faq_ld(HOME_FAQ)]
     html = page("/", f"{BRAND} | 서울 강서구 방문 마사지 예약 안내",
-                "굿데이 강서출장마사지는 서울 강서구 염창동, 등촌동, 화곡동, 마곡동, 발산동, 방화동 일대 방문 마사지 예약 안내를 제공합니다. 연중무휴 24시간 상담.",
+                "굿데이 강서 출장마사지는 서울 강서구 염창동, 등촌동, 화곡동, 마곡동, 발산동, 방화동 일대 방문 마사지 예약 안내를 제공합니다. 연중무휴 24시간 상담.",
                 "home", body, jsonld)
     write("/", html)
 
@@ -888,7 +892,7 @@ def build_about():
     greeting = notes_block("GREETING", "굿데이 인사말",
         "방문 건강관리를 고민하는 분들께 드리는 인사입니다.",
         [("정중한 휴식을 약속드립니다",
-          ["굿데이 강서출장마사지를 찾아주셔서 감사합니다.",
+          ["굿데이 강서 출장마사지를 찾아주셔서 감사합니다.",
            "저희는 서울 강서구 전역을 대상으로 방문 건강관리 예약을 안내하는 운영팀입니다.",
            "예약부터 마무리까지 정중하고 투명한 응대를 약속드립니다."])],
         _id="greeting")
@@ -919,76 +923,100 @@ def build_about():
         faq_block(about_faq) + cta_band())
     jsonld = [bc_ld(trail), org_ld(), faq_ld(about_faq)]
     html = page("/about/", "굿데이 소개 | 강서구 방문 건강관리 운영 기준 안내",
-        "굿데이 강서출장마사지의 인사말, 서비스 운영 기준, 위생 및 안전 관리 원칙을 안내합니다. 정찰 요금과 정중한 응대를 약속드립니다.",
+        "굿데이 강서 출장마사지의 인사말, 서비스 운영 기준, 위생 및 안전 관리 원칙을 안내합니다. 정찰 요금과 정중한 응대를 약속드립니다.",
         "about", body, jsonld)
     write("/about/", html)
 
 
 # ---- Gangseo representative page -----------------------------------------
 def build_gangseo():
-    trail = [("/", "홈"), (None, "강서출장마사지")]
+    trail = [("/", "홈"), (None, "강서 출장마사지")]
     area_chips = "".join(f'<span class="chip"><b>{r["name"].split("권역")[0]}</b></span>' for r in REGIONS)
-    intro = notes_block("INTRO", "강서구 출장마사지 안내",
-        "강서구 전역을 대상으로 하는 방문 건강관리 안내입니다.",
-        [("강서구 전 지역 방문",
-          ["굿데이는 서울 강서구 염창동부터 방화동까지 전 지역 방문 관리를 안내합니다.",
+    # H2-01 굿데이 강서 출장마사지 안내
+    intro = notes_block("INTRO", "굿데이 강서 출장마사지 안내",
+        "서울 강서구 전역을 대상으로 하는 방문 건강관리 예약 안내입니다.",
+        [("강서 전 지역 방문 안내",
+          ["굿데이 강서 출장마사지는 서울 강서구 염창동부터 방화동까지 전 지역 방문 관리를 안내합니다.",
            "생활권에 맞춰 5개 권역으로 나누어 방문 가능 지역을 안내드립니다."])],
         _id="intro")
+    # H2-02 강서구 출장 가능 지역
     area_section = (
         '<section class="block" id="area"><div class="wrap">'
         '<span class="eyebrow"><span class="pulse"></span>SERVICE AREA</span>'
-        '<h2 class="sec">출장 가능 지역</h2>'
+        '<h2 class="sec">강서구 출장 가능 지역</h2>'
         '<p class="sec-lead">강서구를 5개 권역으로 나누어 안내합니다. 권역을 눌러 동별 안내를 확인하세요.</p>'
         '<div class="grid g3" style="margin-top:26px">' +
         "".join(f'<a class="card reveal" href="/gangseo-gu/{r["slug"]}/"><div class="k">AREA</div>'
                 f'<h3>{r["name"]}</h3><p>{r["summary"]}</p><span class="more">권역 보기 →</span></a>'
                 for r in REGIONS) +
         f'</div><div class="chips">{area_chips}</div></div></section>')
+    # H2-03 강서구 주요 생활권
+    living = notes_block("LIVING ZONE", "강서구 주요 생활권",
+        "권역별 생활권 특성에 맞춰 코스와 도착 시간을 안내합니다.",
+        [("권역별 생활권",
+          ["염창·등촌은 9호선 한강변 주거권, 화곡·우장산은 강서 최대 주거 밀집권입니다.",
+           "가양·마곡은 업무·신주거권, 발산은 교통 요지, 공항·방화는 서부 생활권입니다."])],
+        _id="living")
+    # H2-04 많이 찾는 관리 코스
+    course_cards = "".join(
+        f'<a class="card reveal" href="/course/#{c["slug"]}"><div class="k">{c["kicker"]}</div>'
+        f'<h3>{c["name"]}</h3><p>{c["desc"]}</p><span class="more">코스 보기 →</span></a>'
+        for c in COURSES[:4])
+    course_section = (
+        '<section class="block" id="course"><div class="wrap">'
+        '<span class="eyebrow"><span class="pulse"></span>POPULAR COURSE</span>'
+        '<h2 class="sec">많이 찾는 관리 코스</h2>'
+        '<p class="sec-lead">컨디션과 목적에 맞춰 고를 수 있는 대표 코스입니다.</p>'
+        f'<div class="grid g4" style="margin-top:26px">{course_cards}</div></div></section>')
+    # H2-05 예약 가능 시간
     hours = notes_block("HOURS", "예약 가능 시간",
         "연중무휴 24시간 상담을 운영합니다.",
         [("24시간 상담", ["전화 상담은 연중무휴 24시간 가능합니다.",
                        "실제 방문 가능 시간은 시간대와 위치에 따라 안내드립니다."])],
         _id="hours")
-    check = notes_block("CHECK", "관리 전 확인사항",
+    # H2-06 이용 전 확인사항
+    check = notes_block("CHECK", "이용 전 확인사항",
         "원활한 방문을 위해 미리 확인해 주세요.",
         [("방문 장소", ["방문 가능한 장소와 주소, 연락 가능한 번호를 미리 알려주세요."]),
          ("코스·시간", ["희망 코스와 소요 시간을 예약 시 함께 확인해 주세요."])],
         _id="check")
+    # H2-07 위생 및 안전 안내
     safety = notes_block("HYGIENE & SAFETY", "위생 및 안전 안내",
         "안심하고 받으실 수 있도록 안내드립니다.",
         [("위생·안전", ["용품 위생 관리와 안전 가이드라인을 준수합니다.",
                      "본 서비스는 의료 행위가 아닌 건강관리 서비스이며 만 19세 이상을 대상으로 합니다."])],
         _id="safety")
+    # H2-08 강서 출장마사지 자주 묻는 질문
     gangseo_faq = [
-        ("강서구 출장마사지는 어디까지 되나요?", "염창·등촌·화곡·우장산·가양·마곡·발산·공항·방화 등 강서구 전 지역을 안내드립니다."),
+        ("강서 출장마사지는 어디까지 가능한가요?", "염창·등촌·화곡·우장산·가양·마곡·발산·공항·방화 등 강서구 전 지역을 안내드립니다."),
         ("당일 예약도 가능한가요?", "가능합니다. 다만 시간대와 위치에 따라 방문 가능 시간이 달라질 수 있어 상담 시 확인해 드립니다."),
         ("화곡동처럼 동이 여러 개로 나뉜 곳도 되나요?", "네. 화곡본동·화곡1~8동 등은 화곡동 안내 기준으로 통합 안내드립니다."),
     ]
     body = (breadcrumb(trail) +
         f'<section class="hero"><div class="hero-inner"><div class="hero-copy">'
         f'<span class="eyebrow"><span class="pulse"></span>강서구 대표</span>'
-        f'<h1>강서구 <span class="grad">출장마사지</span><br><span class="serif">한 곳에서.</span></h1>'
-        f'<p class="lead">서울 강서구 전 지역 방문 건강관리 예약을 굿데이가 안내합니다.</p>'
+        f'<h1><span class="grad">강서 출장마사지</span><br><span class="serif">예약 안내</span></h1>'
+        f'<p class="lead">서울 강서구 전 지역 방문 건강관리 예약을 굿데이 강서 출장마사지가 안내합니다.</p>'
         f'<div class="actions"><a class="btn btn-primary" href="tel:{PHONE_TEL}">전화 예약 →</a>'
         f'<a class="btn btn-ghost" href="/gangseo-gu/area/">지역별 안내</a></div></div>'
         f'<div class="hero-visual"><div class="glass"><h3>GANGSEO<b>강서구 전 지역</b></h3>'
         f'<div class="book-row"><span>권역</span><span>5개 생활권</span></div>'
         f'<div class="book-row"><span>상담</span><span>{HOURS}</span></div>'
         f'<a class="bk" href="tel:{PHONE_TEL}">예약 문의 →</a></div></div></div></section>' +
-        intro + area_section + hours + check + safety +
-        price_menu_block() + faq_block(gangseo_faq) + cta_band())
-    jsonld = [bc_ld(trail), localbiz_ld(name="굿데이 강서구 출장마사지", path="/gangseo-gu/"),
-              service_ld("강서구 출장마사지", "서울 강서구 전 지역 방문 건강관리 서비스", "/gangseo-gu/"),
+        intro + area_section + living + course_section + hours + check + safety +
+        price_menu_block() + faq_block(gangseo_faq, "강서 출장마사지 자주 묻는 질문") + cta_band())
+    jsonld = [bc_ld(trail), localbiz_ld(name="굿데이 강서 출장마사지", path="/gangseo-gu/"),
+              service_ld("강서 출장마사지", "서울 강서구 전 지역 방문 건강관리 서비스", "/gangseo-gu/"),
               offer_ld(), faq_ld(gangseo_faq)]
-    html = page("/gangseo-gu/", "강서구 출장마사지 | 굿데이 방문 마사지 안내",
-        "강서구 출장마사지 굿데이 - 염창·화곡·마곡·발산·방화 등 서울 강서구 전 지역 방문 건강관리 예약 안내. 연중무휴 24시간 상담.",
+    html = page("/gangseo-gu/", "강서 출장마사지 | 굿데이 강서구 방문 마사지 예약 안내",
+        "굿데이 강서 출장마사지는 서울 강서구 화곡동, 마곡동, 등촌동, 발산동, 방화동 일대 방문 마사지 예약 안내를 제공합니다. 연중무휴 24시간 상담.",
         "gangseo", body, jsonld)
     write("/gangseo-gu/", html)
 
 
 # ---- Area hub ------------------------------------------------------------
 def build_area_hub():
-    trail = [("/", "홈"), ("/gangseo-gu/", "강서출장마사지"), (None, "지역별 안내")]
+    trail = [("/", "홈"), ("/gangseo-gu/", "강서 출장마사지"), (None, "지역별 안내")]
     blocks = ""
     for r in REGIONS:
         dong_links = "".join(
@@ -1013,7 +1041,7 @@ def build_area_hub():
                      "url": BASE_URL + f"/gangseo-gu/{r['slug']}/"} for r in REGIONS],
     }
     html = page("/gangseo-gu/area/", "강서구 출장마사지 가능 지역 | 굿데이 지역별 안내",
-        "굿데이 강서출장마사지 지역별 안내 - 염창·등촌, 화곡·우장산, 가양·마곡, 발산, 공항·방화 5개 권역별 동별 방문 안내를 제공합니다.",
+        "굿데이 강서 출장마사지 지역별 안내 - 염창·등촌, 화곡·우장산, 가양·마곡, 발산, 공항·방화 5개 권역별 동별 방문 안내를 제공합니다.",
         "area", body, [bc_ld(trail), item_list, offer_ld()])
     write("/gangseo-gu/area/", html)
 
@@ -1021,7 +1049,7 @@ def build_area_hub():
 # ---- Area (권역) pages ----------------------------------------------------
 def build_area_pages():
     for r in REGIONS:
-        trail = [("/", "홈"), ("/gangseo-gu/", "강서출장마사지"),
+        trail = [("/", "홈"), ("/gangseo-gu/", "강서 출장마사지"),
                  ("/gangseo-gu/area/", "지역별 안내"), (None, r["name"])]
         dong_cards = "".join(
             f'<a class="card reveal" href="/gangseo-gu/{d["slug"]}/"><div class="k">동 안내</div>'
@@ -1077,7 +1105,7 @@ def build_area_pages():
 def build_dong_pages():
     for r in REGIONS:
         for d in r["dongs"]:
-            trail = [("/", "홈"), ("/gangseo-gu/", "강서출장마사지"),
+            trail = [("/", "홈"), ("/gangseo-gu/", "강서 출장마사지"),
                      ("/gangseo-gu/area/", "지역별 안내"),
                      (f"/gangseo-gu/{r['slug']}/", r["name"]),
                      (None, f"{d['name']} 출장마사지")]
@@ -1108,7 +1136,7 @@ def build_dong_pages():
                 (f"{d['name']} 도착까지 얼마나 걸리나요?",
                  f"평균 {d['arrival']}분 내외이며, 시간대와 위치에 따라 달라질 수 있습니다."),
                 (f"{d['name']}에서 어떤 코스를 받을 수 있나요?",
-                 "피로 회복·아로마·스포츠·커플/가족 등 전 코스를 동일하게 안내드립니다."),
+                 "피로 회복·아로마·스포츠·커플·가족 등 전 코스를 동일하게 안내드립니다."),
             ]
             chips = (f'<div class="chips">'
                      f'<span class="chip"><b>평균 도착</b> {d["arrival"]}분</span>'
@@ -1148,8 +1176,8 @@ def build_course():
     trail = [("/", "홈"), (None, "코스안내")]
     course_faq = [
         ("코스는 어떻게 선택하나요?", "컨디션과 목적을 말씀해 주시면 피로 회복·아로마·스포츠 중 적합한 코스를 안내드립니다."),
-        ("커플/가족 관리는 어떻게 진행되나요?", "두 분이 같은 공간에서 동시에 받는 동반 관리이며, 인원과 시간에 따라 요금이 달라집니다."),
-        ("기업/단체 관리도 되나요?", "워크숍·행사 등 단체 인원은 사전 협의 후 별도 견적으로 안내드립니다."),
+        ("커플·가족 관리는 어떻게 진행되나요?", "두 분이 같은 공간에서 동시에 받는 동반 관리이며, 인원과 시간에 따라 요금이 달라집니다."),
+        ("기업·단체 관리도 되나요?", "워크숍·행사 등 단체 인원은 사전 협의 후 별도 견적으로 안내드립니다."),
         ("표시된 요금 외 추가 비용이 있나요?", "정찰 요금을 원칙으로 하며, 변동 사항은 예약 시 사전에 안내드립니다."),
     ]
     guide_notes = [
@@ -1167,10 +1195,10 @@ def build_course():
                     "어떤 코스가 맞을지 고민될 때 참고하세요.", guide_notes, _id="guide") +
         faq_block(course_faq) + cta_band())
     jsonld = [bc_ld(trail),
-              service_ld("방문 마사지 코스", "피로 회복·아로마·스포츠·커플/가족·기업/단체 방문 관리 코스", "/course/"),
+              service_ld("방문 마사지 코스", "피로 회복·아로마·스포츠·커플·가족·기업·단체 방문 관리 코스", "/course/"),
               faq_ld(course_faq)]
     html = page("/course/", "코스안내 | 강서구 출장마사지 피로회복·아로마·스포츠 요금",
-        "굿데이 강서출장마사지 코스안내 - 피로 회복, 아로마, 스포츠, 커플/가족, 기업/단체 관리의 코스 설명과 정찰 요금을 안내합니다.",
+        "굿데이 강서 출장마사지 코스안내 - 피로 회복, 아로마, 스포츠, 커플·가족, 기업·단체 관리의 코스 설명과 정찰 요금을 안내합니다.",
         "course", body, jsonld)
     write("/course/", html)
 
@@ -1200,7 +1228,7 @@ def build_reservation():
         notes_block("HOW TO BOOK", "예약 진행 안내", "아래 순서대로 진행됩니다.", notes, _id="about") +
         faq_block(res_faq) + cta_band())
     html = page("/reservation/", "예약안내 | 강서구 출장마사지 예약 방법·결제 안내",
-        "굿데이 강서출장마사지 예약안내 - 예약 방법, 예약 가능 시간, 방문 가능 장소, 결제와 변경·취소 안내를 제공합니다. 연중무휴 24시간 상담.",
+        "굿데이 강서 출장마사지 예약안내 - 예약 방법, 예약 가능 시간, 방문 가능 장소, 결제와 변경·취소 안내를 제공합니다. 연중무휴 24시간 상담.",
         "reservation", body, [bc_ld(trail), faq_ld(res_faq)])
     write("/reservation/", html)
 
@@ -1229,7 +1257,7 @@ def build_guide():
         notes_block("USER GUIDE", "이용 안내", "방문 전후 확인하세요.", notes, _id="about") +
         faq_block(guide_faq) + cta_band())
     html = page("/guide/", "이용가이드 | 강서구 출장마사지 방문 전 준비·주의사항",
-        "굿데이 강서출장마사지 이용가이드 - 처음 이용하시는 분을 위한 방문 전 준비사항, 위생·안전 기준, 관리 후 주의사항과 금지행위 안내입니다.",
+        "굿데이 강서 출장마사지 이용가이드 - 처음 이용하시는 분을 위한 방문 전 준비사항, 위생·안전 기준, 관리 후 주의사항과 금지행위 안내입니다.",
         "guide", body, [bc_ld(trail), faq_ld(guide_faq)])
     write("/guide/", html)
 
@@ -1261,15 +1289,15 @@ def build_reviews():
         '</div></section>' + cta_band())
     item_list = {
         "@context": "https://schema.org", "@type": "ItemList",
-        "name": "굿데이 강서출장마사지 고객후기",
+        "name": "굿데이 강서 출장마사지 고객후기",
         "itemListElement": [
             {"@type": "ListItem", "position": i + 1,
              "item": {"@type": "Review", "reviewRating": {"@type": "Rating", "ratingValue": "5"},
                       "author": {"@type": "Person", "name": w}, "reviewBody": q}}
             for i, (w, c, q) in enumerate(sample)],
     }
-    html = page("/reviews/", "고객후기 | 강서출장마사지 굿데이 방문 마사지 후기",
-        "굿데이 강서출장마사지 고객후기 - 화곡·마곡·염창·발산·방화 등 강서구 전 지역 방문 건강관리 이용 후기를 모았습니다.",
+    html = page("/reviews/", "고객후기 | 강서 출장마사지 굿데이 방문 마사지 후기",
+        "굿데이 강서 출장마사지 고객후기 - 화곡·마곡·염창·발산·방화 등 강서구 전 지역 방문 건강관리 이용 후기를 모았습니다.",
         "reviews", body, [bc_ld(trail), item_list])
     write("/reviews/", html)
 
@@ -1295,8 +1323,8 @@ def build_customer():
         '</div></section>' +
         notes_block("HELP", "문의 안내", "궁금한 점은 언제든 문의해 주세요.", notes, _id="inquiry") +
         faq_block(cust_faq, "자주 묻는 질문") + cta_band())
-    html = page("/customer/", "고객센터 | 강서출장마사지 굿데이 문의·공지",
-        "굿데이 강서출장마사지 고객센터 - 공지사항, 자주 묻는 질문, 1:1 문의, 제휴·기업 문의 안내입니다. 연중무휴 24시간 상담.",
+    html = page("/customer/", "고객센터 | 강서 출장마사지 굿데이 문의·공지",
+        "굿데이 강서 출장마사지 고객센터 - 공지사항, 자주 묻는 질문, 1:1 문의, 제휴·기업 문의 안내입니다. 연중무휴 24시간 상담.",
         "customer", body, [bc_ld(trail), faq_ld(cust_faq)])
     write("/customer/", html)
 
@@ -1319,23 +1347,23 @@ def policy_page(path, active_title, heading, sections, desc):
 
 
 def build_policies():
-    policy_page("/privacy/", "개인정보처리방침 | 굿데이 강서출장마사지", "개인정보처리방침",
+    policy_page("/privacy/", "개인정보처리방침 | 굿데이 강서 출장마사지", "개인정보처리방침",
         [("수집하는 개인정보", ["예약 진행을 위해 연락처, 방문 장소 등 최소한의 정보를 수집합니다."]),
          ("이용 목적", ["수집한 정보는 예약 확정과 방문 안내 목적으로만 이용합니다."]),
          ("보유 및 파기", ["목적 달성 후에는 관련 법령에 따라 지체 없이 파기합니다."]),
          ("개인정보보호책임자", [f"{COMPANY['privacy_officer']} · {EMAIL}"])],
-        "굿데이 강서출장마사지 개인정보처리방침 - 수집 항목, 이용 목적, 보유 및 파기, 개인정보보호책임자 안내입니다.")
-    policy_page("/terms/", "이용약관 | 굿데이 강서출장마사지", "이용약관",
-        [("목적", ["본 약관은 굿데이 강서출장마사지 예약 서비스 이용 조건을 규정합니다."]),
+        "굿데이 강서 출장마사지 개인정보처리방침 - 수집 항목, 이용 목적, 보유 및 파기, 개인정보보호책임자 안내입니다.")
+    policy_page("/terms/", "이용약관 | 굿데이 강서 출장마사지", "이용약관",
+        [("목적", ["본 약관은 굿데이 강서 출장마사지 예약 서비스 이용 조건을 규정합니다."]),
          ("서비스 내용", ["본 서비스는 의료 행위가 아닌 이완·휴식 목적의 방문 건강관리 예약 서비스입니다."]),
          ("이용 자격", ["본 서비스는 만 19세 이상 성인만 이용할 수 있습니다."]),
          ("금지행위", ["불법·퇴폐 행위 요구 등은 금지되며, 위반 시 서비스가 중단될 수 있습니다."])],
-        "굿데이 강서출장마사지 이용약관 - 서비스 내용, 이용 자격, 금지행위 등 이용 조건을 안내합니다.")
-    policy_page("/youth/", "청소년보호정책 | 굿데이 강서출장마사지", "청소년보호정책",
+        "굿데이 강서 출장마사지 이용약관 - 서비스 내용, 이용 자격, 금지행위 등 이용 조건을 안내합니다.")
+    policy_page("/youth/", "청소년보호정책 | 굿데이 강서 출장마사지", "청소년보호정책",
         [("청소년 이용 제한", ["본 서비스는 만 19세 이상 성인을 대상으로 하며 청소년은 이용할 수 없습니다."]),
          ("건전한 운영", ["굿데이는 불법·퇴폐 행위를 일절 제공하지 않으며 건전한 건강관리 서비스를 지향합니다."]),
          ("책임자", [f"청소년보호 책임자 · {COMPANY['privacy_officer']} · {EMAIL}"])],
-        "굿데이 강서출장마사지 청소년보호정책 - 만 19세 이상 이용 제한과 건전한 운영 원칙을 안내합니다.")
+        "굿데이 강서 출장마사지 청소년보호정책 - 만 19세 이상 이용 제한과 건전한 운영 원칙을 안내합니다.")
 
 
 # ---- robots / sitemap / manifest / favicon -------------------------------
