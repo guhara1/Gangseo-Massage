@@ -24,7 +24,6 @@ BRAND      = "굿데이 강서 출장마사지"
 BRAND_SHORT= "굿데이"
 PHONE_DISP = "0508-202-4743"                     # 예약 전화번호
 PHONE_TEL  = "+825082024743"                     # tel: 링크용
-EMAIL      = "help@gangseo-massage.com"          # TODO: 실제 이메일로 교체
 HOURS      = "연중무휴 · 24시간 상담"
 
 COMPANY = {
@@ -508,8 +507,7 @@ def footer_html():
 </div>
 <div class="footer-ops">
   <div><b>운영 시간</b>{HOURS}</div>
-  <div><b>전화 상담</b><a href="tel:{PHONE_TEL}">{PHONE_DISP}</a></div>
-  <div><b>이메일</b><a href="mailto:{EMAIL}">{EMAIL}</a></div>
+  <div><b>전화 예약·상담</b><a href="tel:{PHONE_TEL}">{PHONE_DISP}</a></div>
 </div>
 <div class="company-info">
   <div><b>상호</b> {COMPANY['name']}</div>
@@ -813,7 +811,7 @@ def org_ld():
     return {
         "@context": "https://schema.org", "@type": "Organization",
         "name": BRAND, "legalName": COMPANY["name"], "url": BASE_URL + "/",
-        "email": EMAIL, "telephone": PHONE_DISP,
+        "telephone": PHONE_DISP,
         "address": {"@type": "PostalAddress", "addressLocality": "강서구",
                     "addressRegion": "서울특별시", "addressCountry": "KR"},
     }
@@ -832,7 +830,7 @@ def localbiz_ld(name=None, area="서울특별시 강서구", path="/"):
         "@context": "https://schema.org",
         "@type": "HealthAndBeautyBusiness",
         "name": name or BRAND, "url": BASE_URL + path,
-        "telephone": PHONE_DISP, "email": EMAIL, "priceRange": "₩₩",
+        "telephone": PHONE_DISP, "priceRange": "₩₩",
         "areaServed": {"@type": "AdministrativeArea", "name": area},
         "address": {"@type": "PostalAddress", "addressLocality": "강서구",
                     "addressRegion": "서울특별시", "addressCountry": "KR"},
@@ -1428,11 +1426,11 @@ def build_customer():
     trail = [("/", "홈"), (None, "고객센터")]
     notes = [
         ("공지사항", ["서비스 운영과 관련된 안내를 이곳에 게시합니다."]),
-        ("1:1 문의", [f"전화 {PHONE_DISP} 또는 이메일 {EMAIL}로 문의해 주세요."]),
-        ("제휴·기업 문의", ["기업·단체 방문 관리 및 제휴 문의는 이메일로 접수받습니다."]),
+        ("1:1 문의", [f"전화 {PHONE_DISP}로 문의해 주세요. 연중무휴 24시간 상담을 운영합니다."]),
+        ("제휴·기업 문의", ["기업·단체 방문 관리 및 제휴 문의도 전화로 접수받습니다."]),
     ]
     cust_faq = [
-        ("문의는 어디로 하나요?", f"전화 {PHONE_DISP} 또는 이메일 {EMAIL}로 문의하실 수 있습니다."),
+        ("문의는 어디로 하나요?", f"전화 {PHONE_DISP}로 문의하실 수 있습니다. 연중무휴 24시간 상담을 운영합니다."),
         ("운영 시간이 어떻게 되나요?", "연중무휴 24시간 상담을 운영합니다."),
         ("개인정보는 어떻게 관리되나요?", "개인정보처리방침에 따라 안전하게 관리되며, 자세한 내용은 해당 페이지에서 확인하실 수 있습니다."),
     ]
@@ -1440,7 +1438,7 @@ def build_customer():
         '<section class="block" id="notice"><div class="wrap">'
         '<span class="eyebrow"><span class="pulse"></span>CUSTOMER</span>'
         '<h2 class="sec">고객센터</h2>'
-        f'<p class="sec-lead">전화 {PHONE_DISP} · 이메일 {EMAIL} · {HOURS}</p>'
+        f'<p class="sec-lead">전화 {PHONE_DISP} · {HOURS}</p>'
         '</div></section>' +
         notes_block("HELP", "문의 안내", "궁금한 점은 언제든 문의해 주세요.", notes, _id="inquiry") +
         faq_block(cust_faq, "자주 묻는 질문") + cta_band())
@@ -1472,7 +1470,7 @@ def build_policies():
         [("수집하는 개인정보", ["예약 진행을 위해 연락처, 방문 장소 등 최소한의 정보를 수집합니다."]),
          ("이용 목적", ["수집한 정보는 예약 확정과 방문 안내 목적으로만 이용합니다."]),
          ("보유 및 파기", ["목적 달성 후에는 관련 법령에 따라 지체 없이 파기합니다."]),
-         ("개인정보보호책임자", [f"{COMPANY['privacy_officer']} · {EMAIL}"])],
+         ("개인정보보호책임자", [f"{COMPANY['privacy_officer']} · 전화 {PHONE_DISP}"])],
         "굿데이 강서 출장마사지 개인정보처리방침 - 수집 항목, 이용 목적, 보유 및 파기, 개인정보보호책임자 안내입니다.")
     policy_page("/terms/", "이용약관 | 굿데이 강서 출장마사지", "이용약관",
         [("목적", ["본 약관은 굿데이 강서 출장마사지 예약 서비스 이용 조건을 규정합니다."]),
@@ -1483,7 +1481,7 @@ def build_policies():
     policy_page("/youth/", "청소년보호정책 | 굿데이 강서 출장마사지", "청소년보호정책",
         [("청소년 이용 제한", ["본 서비스는 만 19세 이상 성인을 대상으로 하며 청소년은 이용할 수 없습니다."]),
          ("건전한 운영", ["굿데이는 불법·퇴폐 행위를 일절 제공하지 않으며 건전한 건강관리 서비스를 지향합니다."]),
-         ("책임자", [f"청소년보호 책임자 · {COMPANY['privacy_officer']} · {EMAIL}"])],
+         ("책임자", [f"청소년보호 책임자 · {COMPANY['privacy_officer']} · 전화 {PHONE_DISP}"])],
         "굿데이 강서 출장마사지 청소년보호정책 - 만 19세 이상 이용 제한과 건전한 운영 원칙을 안내합니다.")
 
 
