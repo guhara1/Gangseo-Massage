@@ -661,6 +661,8 @@ def page(path, title, desc, active, body, jsonld=None, og_type="website"):
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
+<link rel="alternate" type="application/rss+xml" title="{BRAND} RSS" href="/rss.xml">
+<link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
 <style>{CSS}</style>
 {ld}
 </head>
@@ -2119,6 +2121,7 @@ def build_meta_files():
         p = prio.get(u, "0.8" if u.count("/") <= 2 else "0.75")
         freq = "daily" if u == "/" else "weekly"
         items += (f"  <url><loc>{BASE_URL}{u}</loc>"
+                  f"<lastmod>{UPDATED}</lastmod>"
                   f"<changefreq>{freq}</changefreq><priority>{p}</priority></url>\n")
     sitemap = ('<?xml version="1.0" encoding="UTF-8"?>\n'
                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -2126,12 +2129,51 @@ def build_meta_files():
     with open(os.path.join(ROOT, "sitemap.xml"), "w", encoding="utf-8") as f:
         f.write(sitemap)
 
-    robots = ("User-agent: *\nAllow: /\nDisallow: /tools/\n\n"
-              "User-agent: GPTBot\nAllow: /\n"
-              "User-agent: ClaudeBot\nAllow: /\n"
-              "User-agent: Google-Extended\nAllow: /\n\n"
-              f"Sitemap: {BASE_URL}/sitemap.xml\n"
-              f"Host: {BASE_URL.replace('https://','')}\n")
+    # ---- RSS 2.0 피드 (네이버·구글 모두 사이트맵으로 인식 → 발견 가속) ----
+    import datetime, email.utils, html as _html
+    dt = datetime.datetime.strptime(UPDATED, "%Y-%m-%d").replace(
+        tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
+    rfc822 = email.utils.format_datetime(dt)
+    rss_items = ""
+    for u in urls:
+        if u in ("/privacy/", "/terms/", "/youth/"):
+            continue  # 정책 페이지는 피드 제외
+        f_in = os.path.join(ROOT, ("index.html" if u == "/" else u.strip("/") + "/index.html"))
+        try:
+            doc = open(f_in, encoding="utf-8").read()
+            t = re.search(r"<title>(.*?)</title>", doc, re.S).group(1)
+            ds = re.search(r'<meta name="description" content="(.*?)"', doc, re.S).group(1)
+        except Exception:
+            t, ds = BRAND, ""
+        loc = BASE_URL + u
+        rss_items += (
+            "  <item>"
+            f"<title>{_html.escape(t)}</title>"
+            f"<link>{loc}</link>"
+            f'<guid isPermaLink="true">{loc}</guid>'
+            f"<description>{_html.escape(ds)}</description>"
+            f"<pubDate>{rfc822}</pubDate>"
+            "</item>\n")
+    rss = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n<channel>\n'
+           f"<title>{_html.escape(BRAND)}</title>\n"
+           f"<link>{BASE_URL}/</link>\n"
+           "<description>서울 강서구 방문 건강관리(출장마사지) 예약 안내 — 지역별·코스별 안내</description>\n"
+           "<language>ko-KR</language>\n"
+           f"<lastBuildDate>{rfc822}</lastBuildDate>\n"
+           f'<atom:link href="{BASE_URL}/rss.xml" rel="self" type="application/rss+xml"/>\n'
+           + rss_items + "</channel>\n</rss>\n")
+    with open(os.path.join(ROOT, "rss.xml"), "w", encoding="utf-8") as f:
+        f.write(rss)
+
+    # ---- robots.txt (네이버 Yeti·다음 Daumoa·구글·빙 명시 허용 + 사이트맵/RSS) ----
+    bots = ["Googlebot", "Googlebot-Image", "Bingbot", "Yeti", "NaverBot",
+            "Daumoa", "GPTBot", "ClaudeBot", "Google-Extended"]
+    robots = "User-agent: *\nAllow: /\nDisallow: /tools/\n\n"
+    robots += "".join(f"User-agent: {b}\nAllow: /\n" for b in bots) + "\n"
+    robots += (f"Sitemap: {BASE_URL}/sitemap.xml\n"
+               f"Sitemap: {BASE_URL}/rss.xml\n"
+               f"Host: {BASE_URL.replace('https://','')}\n")
     with open(os.path.join(ROOT, "robots.txt"), "w", encoding="utf-8") as f:
         f.write(robots)
 

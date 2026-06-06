@@ -20,7 +20,7 @@
 /reviews/                 고객후기
 /customer/                고객센터
 /privacy/ /terms/ /youth/ 정책 페이지
-sitemap.xml robots.txt site.webmanifest  메타 파일
+sitemap.xml rss.xml robots.txt site.webmanifest  메타 파일(사이트맵+RSS)
 favicon.svg favicon.ico icon-*.png assets/og-cover.jpg  브랜드 이미지
 ```
 
