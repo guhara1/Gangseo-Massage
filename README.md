@@ -42,7 +42,7 @@ python3 tools/gen_icons.py  # 파비콘 / PWA 아이콘 / OG 이미지 생성 (P
 
 | 상수 | 현재값(placeholder) | 설명 |
 |---|---|---|
-| `BASE_URL` | `https://www.gangseo-massage.com` | 실제 도메인 |
+| `BASE_URL` | `https://gangseo-massage.pages.dev` | 메인 도메인(Cloudflare Pages, 설정됨) |
 | `PHONE_DISP` / `PHONE_TEL` | `0508-202-4743` | 예약 전화번호(설정됨) |
 | `EMAIL` | `help@gangseo-massage.com` | 실제 이메일 |
 | `COMPANY.biz_no` | `000-00-00000` | 사업자등록번호 |

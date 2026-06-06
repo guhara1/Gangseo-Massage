@@ -19,7 +19,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # ---------------------------------------------------------------------------
 # Brand / business constants  (replace placeholders before going live)
 # ---------------------------------------------------------------------------
-BASE_URL   = "https://www.gangseo-massage.com"   # TODO: 실제 도메인으로 교체
+BASE_URL   = "https://gangseo-massage.pages.dev"  # 메인 도메인 (Cloudflare Pages)
 BRAND      = "굿데이 강서 출장마사지"
 BRAND_SHORT= "굿데이"
 PHONE_DISP = "0508-202-4743"                     # 예약 전화번호

@@ -9,5 +9,5 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://www.gangseo-massage.com/sitemap.xml
-Host: www.gangseo-massage.com
+Sitemap: https://gangseo-massage.pages.dev/sitemap.xml
+Host: gangseo-massage.pages.dev
