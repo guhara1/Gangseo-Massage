@@ -775,9 +775,11 @@ def article_ld(title, desc, path):
     }
 
 def content_page(path, active, trail, *, title, desc, eyebrow, h1, lead,
-                 sections, faq, data_note=None, service=None, show_price=False):
+                 sections, faq, data_note=None, service=None, show_price=False,
+                 top_links=None, extra_schema=None):
     """E-E-A-T 기준 개별 콘텐츠 페이지 생성기.
-    sections: [(h2, [블록...])]  블록은 문자열(문단) 또는 ("ul",[항목]) / ("h3","제목")."""
+    sections: [(h2, [블록...])]  블록은 문자열(문단) 또는 ("ul",[항목]) / ("h3","제목").
+    top_links: 상단 CTA 버튼 [(href, label, primary?)]   extra_schema: 추가 JSON-LD 리스트."""
     art = ""
     for h2, blocks in sections:
         art += f"<h2>{h2}</h2>"
@@ -790,11 +792,20 @@ def content_page(path, active, trail, *, title, desc, eyebrow, h1, lead,
                 art += f"<p>{b}</p>"
     if data_note:
         art += f'<div class="data-box"><b>현장 운영 메모</b><p>{data_note}</p></div>'
+    links_html = ""
+    if top_links:
+        btns = ""
+        for href, label, *rest in top_links:
+            primary = rest and rest[0]
+            cls = "btn btn-primary" if primary else "btn btn-ghost"
+            tag_attr = "" if href.startswith("tel:") else ""
+            btns += f'<a class="{cls}" href="{href}"{tag_attr}>{label}</a>'
+        links_html = f'<div class="actions" style="margin-top:20px">{btns}</div>'
     body = (breadcrumb(trail) +
         f'<section class="block" style="padding-bottom:32px"><div class="wrap">'
         f'<span class="eyebrow"><span class="pulse"></span>{eyebrow}</span>'
         f'<h1 style="font-size:clamp(29px,5vw,50px);font-weight:800;letter-spacing:-.03em;margin:14px 0 10px">{h1}</h1>'
-        f'<p class="sec-lead">{lead}</p>{byline()}</div></section>'
+        f'<p class="sec-lead">{lead}</p>{byline()}{links_html}</div></section>'
         f'<section class="block" style="padding-top:8px"><div class="wrap"><div class="article">{art}</div></div></section>'
         + (price_menu_block() if show_price else "")
         + faq_block(faq) + cta_band())
@@ -802,6 +813,8 @@ def content_page(path, active, trail, *, title, desc, eyebrow, h1, lead,
     if service:
         jsonld.append(service_ld(service[0], service[1], path))
         jsonld.append(offer_ld())
+    if extra_schema:
+        jsonld += extra_schema
     write(path, page(path, title, desc, active, body, jsonld, og_type="article"))
 
 # ---------------------------------------------------------------------------
@@ -1212,73 +1225,156 @@ def build_area_pages():
 
 
 # ---- 동 pages -------------------------------------------------------------
+# 동별 방문 가능 생활권 (역/지역 H3) — 역명은 별도 페이지 대신 본문 H3에서 흡수
+DONG_ZONES = {
+    "yeomchang-dong": [("염창역 인근", "9호선 염창역을 중심으로 한 주거·상업 생활권입니다."),
+        ("증미역 인근", "증미역 방향 한강변 아파트 단지 생활권과 연결됩니다."),
+        ("등촌역 인근", "등촌역 방향 생활권과 가까워 함께 안내되는 경우가 많습니다."),
+        ("한강변·올림픽대로 인근", "한강공원과 올림픽대로에 접한 강변 주거지입니다.")],
+    "deungchon-dong": [("등촌역 인근", "9호선 등촌역 중심 생활권으로 강서구청과 가깝습니다."),
+        ("염창역 인근", "염창역 방향 주거 생활권과 이어집니다."),
+        ("강서구청 인근", "행정·생활 인프라가 모인 중심 생활권입니다."),
+        ("등촌중앙시장 인근", "전통시장 주변 주거 밀집 생활권입니다.")],
+    "hwagok-dong": [("화곡역 인근", "5호선 화곡역 중심의 강서 최대 상업·주거 생활권입니다."),
+        ("까치산역 인근", "까치산역 방향 생활권으로 신정·화곡 경계와 가깝습니다."),
+        ("화곡본동시장 인근", "전통시장 주변 주거 밀집 생활권입니다."),
+        ("강서 주거 밀집지", "화곡본동·1~8동 일대 주거 밀집 생활권입니다.")],
+    "ujangsan-dong": [("우장산역 인근", "5호선 우장산역 중심 생활권입니다."),
+        ("화곡역 인근", "화곡역 방향 상업 생활권과 연결됩니다."),
+        ("우장산근린공원 인근", "공원을 낀 조용한 주거 생활권입니다."),
+        ("학군 주거지", "학교가 모인 정주형 주거 생활권입니다.")],
+    "gayang-dong": [("가양역 인근", "9호선 가양역 중심 대단지 주거 생활권입니다."),
+        ("증미역 인근", "증미역 방향 한강변 생활권과 이어집니다."),
+        ("허준박물관 인근", "문화시설 주변 주거 생활권입니다."),
+        ("한강·가양대교 인근", "한강과 가양대교에 접한 강변 생활권입니다.")],
+    "magok-dong": [("마곡나루역 인근", "9호선·공항철도 마곡나루역 중심 업무·신주거 생활권입니다."),
+        ("마곡역 인근", "5호선 마곡역 방향 생활권입니다."),
+        ("발산역 인근", "발산역 방향 업무·주거 생활권과 연결됩니다."),
+        ("LG사이언스파크·서울식물원 인근", "연구단지와 식물원 주변 생활권입니다.")],
+    "balsan-dong": [("발산역 인근", "5호선 발산역 중심 교통 요지 생활권입니다."),
+        ("마곡 업무지구 인근", "마곡 업무지구와 인접한 생활권입니다."),
+        ("강서구민회관 인근", "공공시설 주변 주거 생활권입니다."),
+        ("우장산 인근", "우장산 자락의 주거 생활권입니다.")],
+    "naebalsan-dong": [("발산역 인근", "발산역과 가까운 정주형 주거 생활권입니다."),
+        ("내발산동 주거단지", "대단지 아파트가 모인 주거 생활권입니다."),
+        ("등촌로 일대", "등촌로 방향 생활권과 연결됩니다."),
+        ("우장산 인근", "우장산 자락의 조용한 주거지입니다.")],
+    "oebalsan-dong": [("발산역 인근", "발산역 방향 생활권과 이어지는 외곽 주거지입니다."),
+        ("KBS스포츠월드 인근", "체육시설 주변 생활권입니다."),
+        ("수명산 인근", "수명산 자락의 녹지 주거 생활권입니다."),
+        ("공항대로 일대", "공항대로를 낀 생활권입니다.")],
+    "gonghang-dong": [("공항시장역 인근", "5호선 공항시장역 중심 생활권입니다."),
+        ("송정역 인근", "송정역 방향 생활권과 연결됩니다."),
+        ("김포공항 인근", "공항 배후 상업·숙소 생활권입니다."),
+        ("공항대로 일대", "공항대로를 낀 주거·상업 생활권입니다.")],
+    "banghwa-dong": [("방화역 인근", "5호선 방화역 중심 주거 생활권입니다."),
+        ("개화산역 인근", "개화산역 방향 생활권과 연결됩니다."),
+        ("방화근린공원 인근", "공원을 낀 대단지 주거 생활권입니다."),
+        ("개화산 인근", "개화산 자락의 주거 생활권입니다.")],
+    "gaehwa-dong": [("개화산역 인근", "5호선 개화산역 중심 생활권입니다."),
+        ("김포공항 인근", "공항 배후 생활권과 가깝습니다."),
+        ("개화산 인근", "개화산 자락의 녹지 생활권입니다."),
+        ("공항대로 일대", "공항대로를 낀 외곽 생활권입니다.")],
+}
+
 def build_dong_pages():
     for r in REGIONS:
         for d in r["dongs"]:
+            name, slug = d["name"], d["slug"]
+            path = f"/gangseo-gu/{slug}/"
             trail = [("/", "홈"), ("/gangseo-gu/", "강서 출장마사지"),
                      ("/gangseo-gu/area/", "지역별 안내"),
                      (f"/gangseo-gu/{r['slug']}/", r["name"]),
-                     (None, f"{d['name']} 출장마사지")]
-            notes = [
-                ("동(洞) 특징과 생활권",
-                 [f"{d['name']}은 {d['character']}입니다.",
-                  f"주요 위치는 {d['landmarks']}입니다."]),
-                ("평균 도착 시간",
-                 [f"{d['name']} 일대는 평균 {d['arrival']}분 내외로 도착합니다.",
-                  "시간대와 정확한 위치에 따라 도착 시간은 달라질 수 있습니다."]),
-                ("추천 코스와 예약",
-                 ["피로 회복·아로마 관리가 많이 선택됩니다.",
-                  "예약 시 희망 코스와 시간을 함께 말씀해 주세요."]),
+                     (None, f"{name} 출장마사지")]
+            siblings = [x for x in r["dongs"] if x["slug"] != slug]
+            zones = DONG_ZONES.get(slug, [])
+            stations = [t.replace(" 인근", "") for t, _ in zones if "역" in t][:3]
+            station_list = ", ".join(stations) if stations else d["landmarks"].split(",")[0]
+            first_station = stations[0] if stations else name
+
+            # 상단 CTA
+            top_links = [("tel:" + PHONE_TEL, "예약문의", True),
+                         ("/course/", "코스안내"),
+                         ("/gangseo-gu/", "강서 출장마사지 대표")]
+            if siblings:
+                top_links.append((f"/gangseo-gu/{siblings[0]['slug']}/", f"{siblings[0]['name']} 출장마사지"))
+
+            # 생활권 블록 (H3)
+            zone_blocks = [f"{name}은 지하철·도로망을 따라 인근 생활권과 연결됩니다. 세부 방문 가능 여부는 정확한 위치, 예약 시간, 배정 상황에 따라 달라질 수 있습니다."]
+            for zt, zd in zones:
+                zone_blocks += [("h3", zt), zd]
+            zone_blocks += [("h3", "주거지·숙소 방문 안내"),
+                            "자택·오피스텔·숙소 등으로 방문하며, 공동현관 출입 방법과 정확한 주소를 알려주시면 도착이 빨라집니다."]
+
+            # 권역 함께 보기 내부링크
+            region_links = ['<a href="/gangseo-gu/">강서 출장마사지</a>',
+                            '<a href="/gangseo-gu/area/">강서구 출장 가능 지역</a>',
+                            f'<a href="/gangseo-gu/{r["slug"]}/">{r["name"]}</a>']
+            region_links += [f'<a href="/gangseo-gu/{s["slug"]}/">{s["name"]} 출장마사지</a>' for s in siblings]
+            region_tail = d["sub_note"] if d.get("sub_note") else \
+                f"{r['name']}은 생활권이 이어져 있어 인근 동과 함께 안내드리는 경우가 많습니다."
+
+            sections = [
+                (f"{name} 출장마사지 이용 안내", [
+                    f"{name} 출장마사지는 고객이 원하는 장소로 방문해 피로 회복과 컨디션 관리를 돕는 방문형 관리 서비스입니다.",
+                    "예약 시 위치·희망 시간·코스·인원 정보를 확인한 뒤 방문 가능 여부를 안내드립니다.",
+                    ("ul", ["방문 마사지 서비스 개요", "예약 후 진행 순서",
+                            "이용 가능한 장소(자택·숙소·오피스텔)", "당일 예약 가능 여부", "이용 전 확인사항"]),
+                    "예약이 확정되면 약속된 시간에 맞춰 관리사가 방문하고, 관리 후 공간을 정돈하며 마무리합니다."]),
+                (f"{name} 방문 가능 생활권", zone_blocks),
+                (f"{r['name']} 함께 보기", [
+                    f"{name}과 가까운 같은 권역 생활권도 함께 확인할 수 있습니다.",
+                    ("ul", region_links), region_tail]),
+                (f"{name}에서 많이 찾는 관리 코스", [
+                    f"{name}에서는 퇴근 후 피로 회복 관리, 장시간 근무 뒤 근육 이완을 위한 스포츠 관리, 편안한 휴식을 위한 아로마 관리 문의가 많습니다.",
+                    ("h3", "피로 회복 관리"), "전신의 긴장을 부드럽게 풀어주는 스웨디시 계열 기본 관리입니다.",
+                    ("h3", "아로마 관리"), "블렌딩 오일의 향과 함께 심신을 이완하는 관리입니다.",
+                    ("h3", "스포츠 관리"), "운동·장시간 근무 후 뭉친 근육 회복에 초점을 둔 관리입니다.",
+                    ("h3", "커플·가족 방문 관리"), "두 분이 같은 공간에서 동시에 받는 동반 관리입니다.",
+                    ("ul", ['<a href="/course/">전체 코스 보기</a>', '<a href="/course/aroma/">아로마 관리</a>',
+                            '<a href="/course/sports/">스포츠 관리</a>', '<a href="/course/price/">가격 안내</a>']),
+                    "코스는 이용 목적과 컨디션에 따라 선택하는 것이 좋으며, 자세한 설명은 코스안내에서 확인하실 수 있습니다."]),
+                (f"{name} 출장마사지 예약 가능 시간", [
+                    f"{name} 방문 예약은 시간대와 배정 상황에 따라 가능 여부가 달라질 수 있습니다.",
+                    ("ul", ["당일 예약 가능 여부(시간대별 상이)", "저녁 시간대 예약 안내",
+                            "주말 예약 안내", "사전 예약 권장"]),
+                    f"저녁 시간대와 주말에는 문의가 몰릴 수 있어, 평균 {d['arrival']}분 내외 도착을 기준으로 여유 있게 예약하시길 권장드립니다."]),
+                ("방문 전 준비사항", [
+                    "원활한 방문 관리를 위해 아래 사항을 미리 확인해주시면 좋습니다.",
+                    ("ul", ["정확한 주소", "공동현관 출입 방법", "주차 가능 여부",
+                            "조용한 공간", "수건 및 샤워 가능 여부", "예약자 연락 가능 여부"]),
+                    "숙소나 오피스텔 이용 시에는 방문 가능 여부와 출입 안내를 함께 확인하는 것이 좋습니다."]),
+                ("위생 및 안전 안내", [
+                    "굿데이는 편안하고 안전한 이용을 위해 예약 정보 확인, 방문 전 안내, 위생 관리 기준을 중요하게 운영합니다.",
+                    ("ul", ["청결한 관리 기준", "예약 정보 확인", "고객 정보 보호",
+                            "금지행위 안내", "안전한 이용 기준"]),
+                    "본 서비스는 의료 행위가 아닌 건강관리 서비스이며 만 19세 이상 성인을 대상으로 합니다. 건전한 방문 관리를 위해 이용 전 금지행위 안내를 확인해주세요."]),
             ]
-            if d.get("sub_note"):
-                notes.append(("세부 지역 안내", [d["sub_note"]]))
-            reviews = [
-                (f"{d['name']} · 30대", "도착 시간 안내가 정확하고 응대가 정중했습니다."),
-                (f"{d['name']} · 40대", "아로마 관리 후 한결 가벼워졌어요. 또 이용할게요."),
-            ]
-            reviews_html = "".join(
-                f'<div class="review reveal"><div class="stars">★★★★★</div>'
-                f'<p>“{q}”</p><div class="who">{w}</div></div>' for w, q in reviews)
             dong_faq = [
-                (f"{d['name']} 어디까지 방문 가능한가요?",
-                 f"{d['name']} 일대 방문 가능 여부는 예약 시간과 위치에 따라 안내드립니다. " +
-                 (d["sub_note"] if d.get("sub_note") else "정확한 위치를 알려주시면 확인해 드립니다.")),
-                (f"{d['name']} 도착까지 얼마나 걸리나요?",
-                 f"평균 {d['arrival']}분 내외이며, 시간대와 위치에 따라 달라질 수 있습니다."),
-                (f"{d['name']}에서 어떤 코스를 받을 수 있나요?",
-                 "피로 회복·아로마·스포츠·커플·가족 등 전 코스를 동일하게 안내드립니다."),
+                (f"{name} 전 지역 방문이 가능한가요?",
+                 f"예약 시간, 정확한 위치, 배정 상황에 따라 가능 여부가 달라질 수 있습니다. {station_list} 인근 등 세부 위치를 기준으로 안내드립니다."),
+                (f"{first_station} 근처도 예약할 수 있나요?",
+                 f"{first_station} 인근은 {name} 주요 생활권으로 함께 안내할 수 있습니다. 정확한 방문 가능 여부는 예약 시 위치를 기준으로 확인합니다."),
+                ("당일 예약도 가능한가요?",
+                 "가능 여부는 시간대에 따라 달라질 수 있습니다. 저녁 시간대와 주말에는 예약이 몰릴 수 있어 사전 문의를 권장드립니다."),
+                ("예약 전 준비할 것이 있나요?",
+                 "정확한 주소, 출입 방법, 주차 가능 여부, 조용한 공간을 미리 확인해주시면 원활한 이용에 도움이 됩니다."),
+                ("어떤 코스를 선택하면 좋나요?",
+                 "피로 회복이 목적이라면 기본 관리, 근육 이완이 필요하다면 스포츠 관리, 편안한 휴식을 원한다면 아로마 관리를 선택하는 것이 좋습니다."),
             ]
-            chips = (f'<div class="chips">'
-                     f'<span class="chip"><b>평균 도착</b> {d["arrival"]}분</span>'
-                     f'<span class="chip"><b>운영</b> {HOURS}</span>'
-                     f'<span class="chip"><b>권역</b> {r["name"]}</span></div>')
-            body = (breadcrumb(trail) +
-                f'<section class="block"><div class="wrap">'
-                f'<span class="eyebrow"><span class="pulse"></span>강서구 {d["name"]}</span>'
-                f'<h2 class="sec">{d["name"]} 출장마사지</h2>'
-                f'<p class="sec-lead">{d["landmarks"]} 일대 방문 건강관리 예약 안내입니다.</p>'
-                f'{chips}</div></section>' +
-                notes_block("OVERVIEW", f"{d['name']} 방문 안내",
-                            f"{d['name']} 출장마사지 이용 전 확인하세요.", notes, _id="about") +
-                price_menu_block() +
-                '<section class="block" id="reviews"><div class="wrap">'
-                f'<span class="eyebrow"><span class="pulse"></span>REVIEWS</span>'
-                f'<h2 class="sec">{d["name"]} 고객 후기</h2>'
-                f'<div class="grid g2" style="margin-top:24px">{reviews_html}</div></div></section>' +
-                faq_block(dong_faq) + cta_band(f"{d['name']} 방문 예약을 도와드릴까요?"))
-            jsonld = [bc_ld(trail),
-                      localbiz_ld(name=f"굿데이 {d['name']} 출장마사지",
-                                  area=f"서울특별시 강서구 {d['name']}",
-                                  path=f"/gangseo-gu/{d['slug']}/"),
-                      service_ld(f"{d['name']} 출장마사지",
-                                 f"강서구 {d['name']} 일대 방문 건강관리 서비스",
-                                 f"/gangseo-gu/{d['slug']}/"),
-                      offer_ld(), faq_ld(dong_faq)]
-            html = page(f"/gangseo-gu/{d['slug']}/",
-                f"{d['name']} 출장마사지 | 강서구 {d['name']} 방문 마사지",
-                f"강서구 {d['name']} 출장마사지 안내 페이지입니다. {d['landmarks']} 인근 방문 가능 지역, 예약 가능 시간, 코스 선택 기준, 이용 전 확인사항을 확인해보세요.",
-                "area", body, jsonld)
-            write(f"/gangseo-gu/{d['slug']}/", html)
+            lead = (f"강서구 {name} 일대에서 방문 마사지 예약을 찾는 분들을 위해 출장 가능 지역, 예약 가능 시간, "
+                    f"코스 선택 기준, 이용 전 확인사항을 정리했습니다. {name}은 {station_list} 인근 생활권과 가까워 "
+                    f"주거지·숙소·오피스텔 방문 문의가 많은 지역입니다.")
+            content_page(path, "area", trail,
+                title=f"{name} 출장마사지 | 강서구 {name} 방문 마사지 예약 안내",
+                desc=f"강서구 {name} 출장마사지 안내 페이지입니다. {station_list} 인근 방문 가능 지역과 예약 가능 시간, 코스 선택 기준을 확인해보세요.",
+                eyebrow=f"강서구 {name}", h1=f"{name} 출장마사지 예약 안내", lead=lead,
+                sections=sections, faq=dong_faq,
+                data_note=f"{name} 일대는 평균 {d['arrival']}분 내외로 도착합니다(예약 데이터 기준). 저녁·주말은 문의가 몰려 도착이 다소 길어질 수 있어 사전 예약을 권장드립니다.",
+                service=(f"{name} 출장마사지", f"강서구 {name} 일대 방문 건강관리 서비스"),
+                show_price=True, top_links=top_links,
+                extra_schema=[localbiz_ld(name=f"굿데이 {name} 출장마사지",
+                                          area=f"서울특별시 강서구 {name}", path=path)])
 
 
 # ---- Course --------------------------------------------------------------
