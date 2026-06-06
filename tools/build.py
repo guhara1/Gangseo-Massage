@@ -26,6 +26,8 @@ PHONE_DISP = "0508-202-4743"                     # 예약 전화번호
 PHONE_TEL  = "+825082024743"                     # tel: 링크용
 HOURS      = "연중무휴 · 24시간 상담"
 INDEXNOW_KEY = "da13fc2a62ee6d42f722420f9353f628"   # IndexNow(빙·네이버 등) 인증 키
+NAVER_VERIFY = "bb3aeb4e2ef566949c6c2881e18879cd0a0dd044"  # 네이버 서치어드바이저 소유확인(메인만)
+GOOGLE_VERIFY = ""                                   # 구글 서치콘솔 소유확인(메인만, 필요 시 입력)
 
 COMPANY = {
     "name": "굿데이 헬스케어",
@@ -620,6 +622,12 @@ def page(path, title, desc, active, body, jsonld=None, og_type="website"):
             for b in blocks
         )
     og_img = BASE_URL + "/assets/og-cover.jpg"
+    verify = ""
+    if path == "/":
+        if NAVER_VERIFY:
+            verify += f'\n<meta name="naver-site-verification" content="{NAVER_VERIFY}">'
+        if GOOGLE_VERIFY:
+            verify += f'\n<meta name="google-site-verification" content="{GOOGLE_VERIFY}">'
     html = f"""<!doctype html>
 <html lang="ko">
 <head>
@@ -629,7 +637,7 @@ def page(path, title, desc, active, body, jsonld=None, og_type="website"):
 <meta name="format-detection" content="telephone=no">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <meta name="googlebot" content="index,follow">
-<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="referrer" content="strict-origin-when-cross-origin">{verify}
 <title>{title}</title>
 <meta name="description" content="{desc}">
 <meta name="author" content="{COMPANY['name']} 운영팀">
