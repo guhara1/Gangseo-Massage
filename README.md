@@ -8,11 +8,13 @@
 ```
 /                         홈
 /about/                   굿데이 소개
-/gangseo-gu/              강서출장마사지 (강서 대표)
+/gangseo-gu/              강서 출장마사지 (강서 대표)
 /gangseo-gu/area/         지역별 안내 (허브)
 /gangseo-gu/<권역>-area/  5개 권역 페이지
 /gangseo-gu/<동>-dong/    12개 동 페이지
-/course/                  코스안내
+/gangseo-gu/hours/ checklist/ safety/ faq/   강서 안내 개별 페이지(각 ~2000자)
+/course/                  코스안내 (전체 코스 허브)
+/course/fatigue/ aroma/ sports/ couple/ group/ price/ guide/  코스 개별 페이지(각 ~2000자)
 /reservation/             예약안내
 /guide/                   이용가이드
 /reviews/                 고객후기
@@ -41,7 +43,7 @@ python3 tools/gen_icons.py  # 파비콘 / PWA 아이콘 / OG 이미지 생성 (P
 | 상수 | 현재값(placeholder) | 설명 |
 |---|---|---|
 | `BASE_URL` | `https://www.gangseo-massage.com` | 실제 도메인 |
-| `PHONE_DISP` / `PHONE_TEL` | `0507-1234-5678` | 실제 전화번호 |
+| `PHONE_DISP` / `PHONE_TEL` | `0508-202-4743` | 예약 전화번호(설정됨) |
 | `EMAIL` | `help@gangseo-massage.com` | 실제 이메일 |
 | `COMPANY.biz_no` | `000-00-00000` | 사업자등록번호 |
 | `COMPANY.sales_no` | `2026-서울강서-0000` | 통신판매업신고번호 |
