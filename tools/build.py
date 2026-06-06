@@ -190,8 +190,12 @@ header{position:sticky;top:0;z-index:60;backdrop-filter:blur(14px);
   border-radius:14px;box-shadow:0 20px 48px rgba(0,0,0,.45);opacity:0;visibility:hidden;transform:translateY(6px);
   transition:.22s;z-index:70}
 .menu>li:hover>.submenu,.menu>li:focus-within>.submenu{opacity:1;visibility:visible;transform:none}
+.submenu li{position:relative}
 .submenu li a{display:block;padding:9px 12px;font-size:13.5px;color:var(--muted);border-radius:9px}
 .submenu li a:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.submenu li.has-sub>a::after{content:"›";float:right;color:var(--dim);font-weight:700}
+.submenu .sub2{position:absolute;top:-9px;left:calc(100% + 7px);transform:translateX(6px)}
+.submenu li.has-sub:hover>.sub2,.submenu li.has-sub:focus-within>.sub2{opacity:1;visibility:visible;transform:none}
 .cta-pill{margin-left:6px;padding:11px 18px!important;background:var(--grad);color:#1a1208!important;
   border-radius:999px;font-weight:800!important}
 .toggle{display:none;margin-left:auto;background:none;border:1px solid var(--line);color:var(--text);
@@ -356,8 +360,10 @@ details>div{padding:0 22px 20px;color:var(--muted);font-size:14.5px;line-height:
     overflow:auto;transform:translateY(-12px);opacity:0;visibility:hidden;transition:.25s}
   .menu.open{transform:none;opacity:1;visibility:visible}
   .menu>li>a{padding:13px 12px}
-  .submenu{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;background:transparent;
-    border:none;padding:0 0 6px 12px;min-width:0}
+  .submenu,.submenu .sub2{position:static;opacity:1;visibility:visible;transform:none;box-shadow:none;
+    background:transparent;border:none;padding:0 0 6px 12px;min-width:0;left:auto;top:auto}
+  .submenu .sub2{padding-left:14px}
+  .submenu li.has-sub>a::after{content:""}
   .cta-pill{text-align:center}
   .hero-inner{grid-template-columns:1fr;gap:36px}
   .hero-visual{max-width:420px}
@@ -383,13 +389,25 @@ def menu_html(active):
             a = f'<a class="cta-pill" href="tel:{PHONE_TEL}">24시 예약</a>'
         sub_html = ""
         if sub:
-            items = "".join(f'<li><a href="{h}">{t}</a></li>' for h, t in sub)
-            sub_html = f'<ul class="submenu">{items}</ul>'
+            parts = []
+            for item in sub:
+                if len(item) == 3:  # 하위 동(洞)을 펼치는 3단 항목
+                    h, t, kids = item
+                    kids_html = "".join(f'<li><a href="{kh}">{kt}</a></li>' for kh, kt in kids)
+                    parts.append(
+                        f'<li class="has-sub"><a href="{h}" aria-haspopup="true">{t}</a>'
+                        f'<ul class="submenu sub2">{kids_html}</ul></li>')
+                else:
+                    h, t = item
+                    parts.append(f'<li><a href="{h}">{t}</a></li>')
+            sub_html = f'<ul class="submenu">{"".join(parts)}</ul>'
         return f"<li>{a}{sub_html}</li>"
 
     region_sub = [("/gangseo-gu/", "강서 출장마사지"),
                   ("/gangseo-gu/area/", "강서구 출장 가능 지역")]
-    region_sub += [(f"/gangseo-gu/{r['slug']}/", r["name"]) for r in REGIONS]
+    region_sub += [(f"/gangseo-gu/{r['slug']}/", r["name"],
+                    [(f"/gangseo-gu/{d['slug']}/", d["name"]) for d in r["dongs"]])
+                   for r in REGIONS]
     items = [
         li("home", "/", "홈"),
         li("about", "/about/", "굿데이 소개", [
