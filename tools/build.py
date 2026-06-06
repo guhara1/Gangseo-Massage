@@ -1066,7 +1066,7 @@ def build_home():
 """
     jsonld = [org_ld(), website_ld(), localbiz_ld(), offer_ld(), faq_ld(HOME_FAQ)]
     html = page("/", f"{BRAND} | 서울 강서구 방문 마사지 예약 안내",
-                "굿데이 강서 출장마사지는 서울 강서구 염창동, 등촌동, 화곡동, 마곡동, 발산동, 방화동 일대 방문 마사지 예약 안내를 제공합니다. 연중무휴 24시간 상담.",
+                "서울 강서구 염창·화곡·마곡·발산·방화 전 지역 방문 마사지(출장마사지) 예약 안내. 연중무휴 24시간 상담.",
                 "home", body, jsonld)
     write("/", html)
 
