@@ -137,6 +137,13 @@ COURSES = [
      "prices": [("협의", "별도 견적"), ("협의", "별도 견적"), ("협의", "별도 견적")]},
 ]
 
+# 코스별 기본 요금 (시간 기준 메뉴 — 메인/모든 지역 페이지 공통)
+TIME_PRICING = [
+    {"name": "60분 코스", "price": "90,000", "dur": "60분", "desc": "기본 컨디션·릴랙스 케어"},
+    {"name": "90분 코스", "price": "150,000", "dur": "90분", "desc": "아로마 포함 추천 구성", "best": True},
+    {"name": "120분 코스", "price": "180,000", "dur": "120분", "desc": "전신 집중 프리미엄 케어"},
+]
+
 # ---------------------------------------------------------------------------
 # Shared CSS  (design system from BLUEPRINT.md)
 # ---------------------------------------------------------------------------
@@ -271,6 +278,25 @@ header{position:sticky;top:0;z-index:60;backdrop-filter:blur(14px);
 .price-card>p{color:var(--muted);font-size:13.5px;margin-bottom:14px}
 .time-rows>div{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
 .time-rows span:last-child{font-weight:700}
+/* 코스별 기본 요금 메뉴 */
+.pmenu{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:28px}
+.pmenu-card{position:relative;text-align:center;padding:36px 24px 26px;border-radius:18px;
+  background:linear-gradient(135deg,var(--surface),var(--surface-2));border:1px solid var(--line);transition:.3s}
+.pmenu-card:hover{transform:translateY(-4px);border-color:rgba(244,210,156,.3);box-shadow:0 18px 42px rgba(0,0,0,.32)}
+.pmenu-card.best{border-color:rgba(244,210,156,.5);box-shadow:0 16px 42px rgba(201,138,107,.2)}
+.pmenu-name{font-weight:800;font-size:17px;margin-bottom:16px}
+.pmenu-price{font-size:clamp(30px,4vw,40px);font-weight:800;letter-spacing:-.035em;line-height:1}
+.pmenu-price span{font-size:15px;font-weight:600;color:var(--muted);margin-left:3px;letter-spacing:0}
+.pmenu-dur{color:var(--gold);font-size:13px;font-weight:700;margin-top:10px}
+.pmenu-desc{color:var(--muted);font-size:13.5px;margin:8px 0 22px}
+.pmenu-btn{display:block;padding:13px;border-radius:11px;border:1px solid var(--line);font-weight:700;font-size:14px;transition:.25s}
+.pmenu-btn:hover{border-color:rgba(244,210,156,.5);transform:translateY(-1px)}
+.pmenu-card.best .pmenu-btn{background:var(--grad);color:#1a1208;border-color:transparent}
+.pmenu-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--grad);color:#1a1208;
+  font-size:11.5px;font-weight:800;padding:5px 15px;border-radius:999px;box-shadow:0 6px 16px rgba(201,138,107,.35)}
+.pmenu-note{margin-top:20px;color:var(--muted);font-size:13px}
+.pmenu-note a{color:var(--gold);font-weight:700;white-space:nowrap}
+@media(max-width:760px){.pmenu{grid-template-columns:1fr}}
 /* faq */
 details{border:1px solid var(--line);border-radius:14px;padding:0;margin-bottom:12px;
   background:linear-gradient(135deg,var(--surface),var(--surface-2));overflow:hidden}
@@ -616,6 +642,44 @@ def price_grid(courses):
         )
     return f'<div class="grid g3">{cards}</div>'
 
+def price_menu_block(anchor="pricing-menu"):
+    """코스별 기본 요금 (60·90·120분) — 메인/모든 지역 페이지 공통 블록."""
+    cards = ""
+    for p in TIME_PRICING:
+        best = " best" if p.get("best") else ""
+        badge = '<span class="pmenu-badge">추천</span>' if p.get("best") else ""
+        cards += (
+            f'<div class="pmenu-card{best}">{badge}'
+            f'<div class="pmenu-name">{p["name"]}</div>'
+            f'<div class="pmenu-price">{p["price"]}<span>원</span></div>'
+            f'<div class="pmenu-dur">{p["dur"]}</div>'
+            f'<div class="pmenu-desc">{p["desc"]}</div>'
+            f'<a class="pmenu-btn" href="tel:{PHONE_TEL}">예약 문의</a></div>'
+        )
+    return (
+        f'<section class="block" id="{anchor}"><div class="wrap">'
+        f'<span class="eyebrow"><span class="pulse"></span>요금 안내</span>'
+        f'<h2 class="sec">코스별 기본 요금</h2>'
+        f'<p class="sec-lead">60·90·120분 코스별 기본 요금입니다. 숨겨진 추가 비용 없이 투명하게 안내합니다.</p>'
+        f'<div class="pmenu">{cards}</div>'
+        f'<p class="pmenu-note">지역·예약 시간대·이동 거리에 따라 상담 시 최종 확인됩니다. '
+        f'<a href="/course/">상세 요금 안내 보기 →</a></p>'
+        f'</div></section>'
+    )
+
+def offer_ld():
+    """코스별 기본 요금 구조화 데이터(Offer)."""
+    return {
+        "@context": "https://schema.org", "@type": "OfferCatalog",
+        "name": "코스별 기본 요금",
+        "itemListElement": [
+            {"@type": "Offer", "name": p["name"],
+             "price": p["price"].replace(",", ""), "priceCurrency": "KRW",
+             "description": p["desc"], "url": BASE_URL + "/course/"}
+            for p in TIME_PRICING
+        ],
+    }
+
 def cta_band(title="오늘 밤, 가까운 곳에서 휴식을 예약하세요", sub=None):
     sub = sub or f"{HOURS} · 전화 한 통으로 방문 일정과 코스를 안내드립니다."
     return f"""<section class="cta-band"><div>
@@ -769,6 +833,8 @@ def build_home():
   <div class="grid g4" style="margin-top:28px">{services}</div>
 </div></section>
 
+{price_menu_block()}
+
 <section class="block" id="region"><div class="wrap">
   <span class="eyebrow"><span class="pulse"></span>SERVICE AREA</span>
   <h2 class="sec">강서구 권역별 안내</h2>
@@ -794,7 +860,7 @@ def build_home():
 
 {cta_band()}
 """
-    jsonld = [org_ld(), website_ld(), localbiz_ld(), faq_ld(HOME_FAQ)]
+    jsonld = [org_ld(), website_ld(), localbiz_ld(), offer_ld(), faq_ld(HOME_FAQ)]
     html = page("/", f"{BRAND} | 서울 강서구 방문 마사지 예약 안내",
                 "굿데이 강서출장마사지는 서울 강서구 염창동, 등촌동, 화곡동, 마곡동, 발산동, 방화동 일대 방문 마사지 예약 안내를 제공합니다. 연중무휴 24시간 상담.",
                 "home", body, jsonld)
@@ -910,10 +976,10 @@ def build_gangseo():
         f'<div class="book-row"><span>상담</span><span>{HOURS}</span></div>'
         f'<a class="bk" href="tel:{PHONE_TEL}">예약 문의 →</a></div></div></div></section>' +
         intro + area_section + hours + check + safety +
-        faq_block(gangseo_faq) + cta_band())
+        price_menu_block() + faq_block(gangseo_faq) + cta_band())
     jsonld = [bc_ld(trail), localbiz_ld(name="굿데이 강서구 출장마사지", path="/gangseo-gu/"),
               service_ld("강서구 출장마사지", "서울 강서구 전 지역 방문 건강관리 서비스", "/gangseo-gu/"),
-              faq_ld(gangseo_faq)]
+              offer_ld(), faq_ld(gangseo_faq)]
     html = page("/gangseo-gu/", "강서구 출장마사지 | 굿데이 방문 마사지 안내",
         "강서구 출장마사지 굿데이 - 염창·화곡·마곡·발산·방화 등 서울 강서구 전 지역 방문 건강관리 예약 안내. 연중무휴 24시간 상담.",
         "gangseo", body, jsonld)
@@ -939,7 +1005,7 @@ def build_area_hub():
         '<span class="eyebrow"><span class="pulse"></span>AREA GUIDE</span>'
         '<h2 class="sec">지역별 안내</h2>'
         '<p class="sec-lead">강서구를 5개 생활 권역으로 나누어 동별 방문 안내를 제공합니다.</p>'
-        + blocks + '</div></section>' + cta_band())
+        + blocks + '</div></section>' + price_menu_block() + cta_band())
     item_list = {
         "@context": "https://schema.org", "@type": "CollectionPage",
         "name": "강서구 출장마사지 지역별 안내", "url": BASE_URL + "/gangseo-gu/area/",
@@ -948,7 +1014,7 @@ def build_area_hub():
     }
     html = page("/gangseo-gu/area/", "강서구 출장마사지 가능 지역 | 굿데이 지역별 안내",
         "굿데이 강서출장마사지 지역별 안내 - 염창·등촌, 화곡·우장산, 가양·마곡, 발산, 공항·방화 5개 권역별 동별 방문 안내를 제공합니다.",
-        "area", body, [bc_ld(trail), item_list])
+        "area", body, [bc_ld(trail), item_list, offer_ld()])
     write("/gangseo-gu/area/", html)
 
 
@@ -993,12 +1059,12 @@ def build_area_pages():
             f'</div></section>' +
             notes_block("FIELD NOTES · 2026", f"{r['name']} 운영 안내",
                         "권역의 특징과 방문 운영 원칙입니다.", notes, _id="about") +
-            faq_block(area_faq) + cta_band())
+            price_menu_block() + faq_block(area_faq) + cta_band())
         jsonld = [bc_ld(trail),
                   localbiz_ld(name=f"굿데이 {r['name']} 출장마사지", area=f"서울특별시 강서구 {r['name']}",
                               path=f"/gangseo-gu/{r['slug']}/"),
                   service_ld(f"{r['name']} 출장마사지", r["summary"], f"/gangseo-gu/{r['slug']}/"),
-                  faq_ld(area_faq)]
+                  offer_ld(), faq_ld(area_faq)]
         html = page(f"/gangseo-gu/{r['slug']}/",
             f"{r['name']} 출장마사지 | 강서구 {r['name']} 방문 마사지",
             f"{r['name']} 출장마사지 안내 - " + ", ".join(d['name'] for d in r['dongs']) +
@@ -1056,10 +1122,7 @@ def build_dong_pages():
                 f'{chips}</div></section>' +
                 notes_block("OVERVIEW", f"{d['name']} 방문 안내",
                             f"{d['name']} 출장마사지 이용 전 확인하세요.", notes, _id="about") +
-                '<section class="block"><div class="wrap">'
-                '<span class="eyebrow"><span class="pulse"></span>PRICING</span>'
-                '<h2 class="sec">코스별 요금</h2>'
-                '<div style="margin-top:24px">' + price_grid(COURSES) + '</div></div></section>' +
+                price_menu_block() +
                 '<section class="block" id="reviews"><div class="wrap">'
                 f'<span class="eyebrow"><span class="pulse"></span>REVIEWS</span>'
                 f'<h2 class="sec">{d["name"]} 고객 후기</h2>'
@@ -1072,7 +1135,7 @@ def build_dong_pages():
                       service_ld(f"{d['name']} 출장마사지",
                                  f"강서구 {d['name']} 일대 방문 건강관리 서비스",
                                  f"/gangseo-gu/{d['slug']}/"),
-                      faq_ld(dong_faq)]
+                      offer_ld(), faq_ld(dong_faq)]
             html = page(f"/gangseo-gu/{d['slug']}/",
                 f"{d['name']} 출장마사지 | 강서구 {d['name']} 방문 마사지",
                 f"강서구 {d['name']} 출장마사지 안내 페이지입니다. {d['landmarks']} 인근 방문 가능 지역, 예약 가능 시간, 코스 선택 기준, 이용 전 확인사항을 확인해보세요.",
